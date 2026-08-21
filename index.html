@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>مسابقة الصف الثالث الإعدادي 2026 | الحلبة المعرفية</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Changa:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1024; --bg-soft:#171A3D; --bg-card:#1D2148;
+    --gold:#F5B942; --gold-2:#E08E2C; --violet:#8B7CF6;
+    --emerald:#22C99B; --rose:#FB5678; --ink:#F5F3FF; --muted:#9CA3D1;
+  }
+  *{ -webkit-tap-highlight-color: transparent; }
+  html,body{ background:var(--bg); color:var(--ink); font-family:'Cairo',sans-serif; }
+  .font-display{ font-family:'Changa',sans-serif; }
+  body{ user-select:none; -webkit-user-select:none; -moz-user-select:none; }
+  input, textarea{ user-select:text; -webkit-user-select:text; }
+  ::selection{ background:transparent; }
+
+  .bg-arena{
+    background:
+      radial-gradient(circle at 15% 10%, rgba(139,124,246,.18), transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(245,185,66,.14), transparent 45%),
+      radial-gradient(circle at 50% 100%, rgba(34,201,155,.10), transparent 45%),
+      var(--bg);
+  }
+  .card{ background:linear-gradient(180deg, var(--bg-card), var(--bg-soft)); border:1px solid rgba(245,185,66,.12); }
+
+  .hexagon{
+    clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0% 50%);
+  }
+
+  .btn-gold{
+    background:linear-gradient(135deg, var(--gold), var(--gold-2));
+    color:#241505; box-shadow:0 8px 24px -8px rgba(245,185,66,.55);
+  }
+  .btn-gold:disabled{ opacity:.45; box-shadow:none; }
+  .btn-gold:active:not(:disabled){ transform:translateY(1px) scale(.99); }
+
+  .option-btn{ transition:all .15s ease; border:1.5px solid rgba(255,255,255,.08); cursor:pointer; }
+  .option-btn:hover{ border-color:rgba(245,185,66,.5); background:rgba(245,185,66,.06); }
+  .option-correct{ border-color:var(--emerald)!important; background:rgba(34,201,155,.14)!important; }
+  .option-wrong{ border-color:var(--rose)!important; background:rgba(251,86,120,.14)!important; }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; animation:rise .35s ease; }
+  @keyframes rise{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)} }
+
+  .progress-track{ background:rgba(255,255,255,.08); }
+  .progress-fill{ background:linear-gradient(90deg, var(--violet), var(--gold)); transition:width .4s ease; }
+
+  .subject-chip{ font-family:'Changa',sans-serif; letter-spacing:.5px; }
+
+  #cheat-overlay{ position:fixed; inset:0; z-index:60; display:none; }
+  #cheat-overlay.active{ display:flex; }
+
+  .medal-glow{ animation:pulse-medal 2.4s ease-in-out infinite; }
+  @keyframes pulse-medal{ 0%,100%{ box-shadow:0 0 0 0 rgba(245,185,66,.35);} 50%{ box-shadow:0 0 0 14px rgba(245,185,66,0);} }
+
+  @media(prefers-reduced-motion: reduce){ *{ animation:none!important; transition:none!important; } }
+
+  ::-webkit-scrollbar{ width:6px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(245,185,66,.3); border-radius:8px; }
+
+  .lb-row{ display:flex; align-items:center; justify-content:space-between; }
+</style>
+</head>
+<body class="bg-arena min-h-screen">
+
+<div id="app" class="min-h-screen flex flex-col items-center px-4 py-6 md:py-10">
+
+  <!-- ===================== WELCOME SCREEN ===================== -->
+  <section id="screen-welcome" class="screen active w-full max-w-lg">
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs subject-chip text-[var(--gold)] mb-4">
+        منهج 2026 • الصف الثالث الإعدادي
+      </div>
+      <h1 class="font-display text-4xl md:text-5xl font-bold leading-tight">
+        الحلبة <span class="text-[var(--gold)]">المعرفية</span>
+      </h1>
+      <p class="text-[var(--muted)] mt-3 text-sm md:text-base">
+        20 سؤالاً خرافياً من كل مواد ثالثة إعدادي… هل أنت مستعد لتتصدّر القمة؟
+      </p>
+    </div>
+
+    <!-- Top scorer congratulation banner -->
+    <div id="top-scorer-banner" class="hidden mb-6">
+      <div class="hexagon card medal-glow px-6 py-4 flex items-center gap-4 mx-auto max-w-sm">
+        <div class="text-3xl">🏆</div>
+        <div class="text-right flex-1">
+          <p class="text-[10px] text-[var(--muted)] subject-chip">مبروك للمتصدّر!</p>
+          <p class="font-display font-bold text-lg text-[var(--gold)]" id="top-scorer-name">—</p>
+          <p class="text-xs text-[var(--muted)]" id="top-scorer-score"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Public leaderboard: visible to everyone, always -->
+    <div class="card rounded-2xl p-5 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-display text-sm text-[var(--gold)] flex items-center gap-2">🏅 لوحة الصدارة</h3>
+        <span id="lb-status" class="text-[9px] text-[var(--muted)]"></span>
+      </div>
+      <div id="leaderboard-list" class="space-y-2 max-h-72 overflow-y-auto pl-1"></div>
+      <p id="leaderboard-empty" class="text-center text-[var(--muted)] text-xs py-3">لا توجد نتائج مسجّلة بعد. كن أول من يبدأ التحدي!</p>
+    </div>
+
+    <div class="card rounded-3xl p-6 md:p-8 shadow-2xl">
+      <label class="block text-sm mb-2 text-[var(--muted)]">الاسم الثلاثي كاملاً</label>
+      <input id="student-name" type="text" placeholder="مثال: أحمد محمد علي"
+        class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[var(--gold)] transition text-base" />
+      <p id="name-error" class="text-[var(--rose)] text-xs mt-2 hidden">من فضلك اكتب الاسم ثلاثياً (3 كلمات على الأقل)</p>
+
+      <div class="grid grid-cols-5 gap-2 mt-6 mb-2">
+        <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">4</span>عربي</div>
+        <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">4</span>علوم</div>
+        <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">4</span>دراسات</div>
+        <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">4</span>رياضة</div>
+        <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">4</span>English</div>
+      </div>
+
+      <button id="start-btn" type="button" class="btn-gold w-full rounded-xl py-3.5 font-display font-bold text-lg mt-4">
+        ابدأ التحدي الآن 🚀
+      </button>
+      <p class="text-center text-[10px] text-[var(--muted)] mt-3">الأسئلة تتغيّر عشوائياً في كل محاولة — احتفظ بتركيزك ولا تغادر الصفحة أثناء الاختبار.</p>
+    </div>
+  </section>
+
+  <!-- ===================== QUIZ SCREEN ===================== -->
+  <section id="screen-quiz" class="screen w-full max-w-xl">
+    <div class="flex items-center justify-between mb-3">
+      <span id="quiz-subject-chip" class="subject-chip text-xs px-3 py-1 rounded-full bg-[var(--violet)]/20 text-[var(--violet)] border border-[var(--violet)]/30"></span>
+      <span id="quiz-timer" class="font-display text-sm text-[var(--gold)]">20:00</span>
+    </div>
+
+    <div class="progress-track h-2 rounded-full overflow-hidden mb-1">
+      <div id="progress-fill" class="progress-fill h-full" style="width:5%"></div>
+    </div>
+    <p class="text-[11px] text-[var(--muted)] mb-5">السؤال <span id="q-index">1</span> من 20</p>
+
+    <div class="card rounded-3xl p-6 md:p-8 shadow-2xl">
+      <h2 id="question-text" class="font-display text-xl md:text-2xl font-semibold leading-relaxed mb-6"></h2>
+      <div id="options-container" class="grid grid-cols-1 gap-3"></div>
+    </div>
+
+    <button id="next-btn" type="button" disabled class="btn-gold w-full rounded-xl py-3.5 font-display font-bold text-lg mt-5">
+      التالي ←
+    </button>
+  </section>
+
+  <!-- ===================== RESULT SCREEN ===================== -->
+  <section id="screen-result" class="screen w-full max-w-lg text-center">
+    <div class="card rounded-3xl p-8 shadow-2xl">
+      <div id="result-emoji" class="text-6xl mb-3">🎉</div>
+      <h2 class="font-display text-2xl font-bold mb-1">أحسنت يا <span id="result-name" class="text-[var(--gold)]"></span>!</h2>
+      <p class="text-[var(--muted)] text-sm mb-6" id="result-sub"></p>
+
+      <div class="hexagon w-40 h-40 mx-auto card flex flex-col items-center justify-center mb-6">
+        <span class="font-display text-4xl font-bold text-[var(--gold)]" id="result-score">0</span>
+        <span class="text-xs text-[var(--muted)]">من 20</span>
+      </div>
+
+      <div id="result-breakdown" class="grid grid-cols-5 gap-2 text-[11px] mb-6"></div>
+
+      <button id="restart-btn" type="button" class="btn-gold w-full rounded-xl py-3.5 font-display font-bold">حاول مرة أخرى بأسئلة جديدة 🔄</button>
+    </div>
+  </section>
+
+  <!-- ===================== ADMIN SCREEN ===================== -->
+  <section id="screen-admin" class="screen w-full max-w-4xl">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="font-display text-2xl font-bold text-[var(--gold)]">لوحة تحكم المشرف</h2>
+      <button id="admin-refresh" type="button" class="text-xs bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">تحديث ⟳</button>
+    </div>
+    <div class="card rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-black/30 text-[var(--muted)] text-xs">
+            <tr>
+              <th class="p-3 text-right">#</th>
+              <th class="p-3 text-right">الاسم</th>
+              <th class="p-3 text-right">الدرجة</th>
+              <th class="p-3 text-right">النسبة</th>
+              <th class="p-3 text-right">الوقت</th>
+              <th class="p-3 text-right">الحالة</th>
+            </tr>
+          </thead>
+          <tbody id="admin-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <p id="admin-empty" class="text-center text-[var(--muted)] text-sm mt-6 hidden">لا توجد محاولات مسجّلة بعد.</p>
+  </section>
+
+</div>
+
+<!-- ===================== CHEAT WARNING OVERLAY ===================== -->
+<div id="cheat-overlay" class="items-center justify-center bg-black/90 backdrop-blur-sm">
+  <div class="card rounded-3xl p-8 max-w-sm mx-4 text-center border-2 border-[var(--rose)]">
+    <div class="text-5xl mb-3">⚠️</div>
+    <h3 class="font-display text-xl font-bold text-[var(--rose)] mb-2">تنبيه هام!</h3>
+    <p id="cheat-message" class="text-sm text-[var(--muted)] mb-5">لاحظنا أنك غادرت شاشة الاختبار. الخروج مرة أخرى سيؤدي لإنهاء المحاولة تلقائياً وإرسال نتيجتك الحالية.</p>
+    <button id="cheat-ack-btn" type="button" class="btn-gold w-full rounded-xl py-2.5 font-bold">فهمت، سأتابع الاختبار</button>
+  </div>
+</div>
+
+<script>
+/* ==================================================================
+   0) هذا السكريبت عادي (وليس module) حتى يعمل زر البدء وكل الواجهة
+      فوراً بشكل مستقل عن نجاح أو فشل الاتصال بـ Firebase.
+   ================================================================== */
+
+/* ---------- إعداد Firebase — استبدل القيم التالية ببيانات مشروعك ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyAvok5NGZmqMPjQZRQpqgchKasvs3RjwJs",
+  authDomain: "quiz2026-eca49.firebaseapp.com",
+  projectId: "quiz2026-eca49",
+  storageBucket: "quiz2026-eca49.firebasestorage.app",
+  messagingSenderId: "217694986731",
+  appId: "1:217694986731:web:8bf1ad24cc39be340a79ae"
+};
+/* غيّر هذا الكود السري قبل النشر */
+const ADMIN_SECRET = "1234";
+const ATTEMPTS_COLLECTION = "attempts";
+
+let firebaseReady = false;
+let fb = {}; // سيحمل: db, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp
+
+/* تحميل Firebase بشكل غير متزامن (dynamic import) حتى لا يوقف باقي الكود لو فشل */
+(async function loadFirebase(){
+  try{
+    const appMod = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js");
+    const fsMod  = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js");
+    const fbApp = appMod.initializeApp(firebaseConfig);
+    fb.db = fsMod.getFirestore(fbApp);
+    fb.collection = fsMod.collection;
+    fb.addDoc = fsMod.addDoc;
+    fb.getDocs = fsMod.getDocs;
+    fb.query = fsMod.query;
+    fb.orderBy = fsMod.orderBy;
+    fb.limit = fsMod.limit;
+    fb.serverTimestamp = fsMod.serverTimestamp;
+    firebaseReady = true;
+    setLbStatus("متصل ✓");
+  }catch(e){
+    console.warn("تعذر الاتصال بـ Firebase، سيتم استخدام التخزين المحلي كبديل مؤقت.", e);
+    firebaseReady = false;
+    setLbStatus("وضع محلي (بدون Firebase)");
+  }
+  loadLeaderboard();
+})();
+
+function setLbStatus(txt){
+  const el = document.getElementById('lb-status');
+  if(el) el.textContent = txt;
+}
+
+/* ---------- تخزين محلي احتياطي (يُستخدم فقط إذا تعذّر الاتصال بـ Firebase) ---------- */
+const LOCAL_KEY = 'quiz_local_attempts_v1';
+function localGetAttempts(){
+  try{ return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); }catch(e){ return []; }
+}
+function localSaveAttempt(a){
+  const arr = localGetAttempts();
+  arr.push(a);
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(arr));
+}
+
+async function submitAttempt(data){
+  if(firebaseReady){
+    try{
+      await fb.addDoc(fb.collection(fb.db, ATTEMPTS_COLLECTION), { ...data, timestamp: fb.serverTimestamp() });
+      return;
+    }catch(e){ console.warn('فشل الإرسال إلى Firestore، سيتم الحفظ محلياً بدلاً من ذلك.', e); }
+  }
+  localSaveAttempt({ ...data, timestamp: Date.now() });
+}
+
+async function fetchAllAttempts(){
+  if(firebaseReady){
+    try{
+      const q = fb.query(fb.collection(fb.db, ATTEMPTS_COLLECTION), fb.orderBy('score','desc'), fb.limit(100));
+      const snap = await fb.getDocs(q);
+      return snap.docs.map(docSnap=>{
+        const v = docSnap.data();
+        return {
+          name: v.name, score: v.score, total: v.total || 20,
+          subjectScores: v.subjectScores || {}, flagged: !!v.flagged,
+          tabSwitchCount: v.tabSwitchCount || 0,
+          time: v.timestamp && v.timestamp.toDate ? v.timestamp.toDate() : null
+        };
+      });
+    }catch(e){ console.warn('فشل جلب البيانات من Firestore، سيتم العرض من التخزين المحلي.', e); }
+  }
+  return localGetAttempts()
+    .map(a=>({ ...a, time: a.timestamp ? new Date(a.timestamp) : null }))
+    .sort((a,b)=> b.score - a.score)
+    .slice(0,100);
+}
+
+/* ==================================================================
+   1) بنك الأسئلة (5 مواد × 15 سؤالاً لكل مادة)
+   ================================================================== */
+const QUESTION_BANK = {
+  arabic: {
+    label: "لغة عربية",
+    items: [
+      { q:"ما نوع الأسلوب في جملة: «ما أجمل السماء!»؟", options:["أسلوب تعجب","أسلوب استفهام","أسلوب نداء","أسلوب أمر"], correct:0 },
+      { q:"علامة إعراب المثنى في حالة الرفع هي:", options:["الألف","الواو","الياء","الضمة"], correct:0 },
+      { q:"«الذين» اسم موصول يُستخدم لـ:", options:["العموم لغير العاقل","جمع المذكر العاقل","المفرد المؤنث","المثنى فقط"], correct:1 },
+      { q:"جمع كلمة «كتاب» هو:", options:["كتب","كتّاب","كاتبون","كتيبات"], correct:0 },
+      { q:"الفعل «يذهبُ» فعل:", options:["ماضٍ","مضارع","أمر","اسم فعل"], correct:1 },
+      { q:"«كأنّ» من أخوات:", options:["إنّ","كان","كاد","ظنّ"], correct:0 },
+      { q:"المفعول به يكون دائماً:", options:["منصوباً","مرفوعاً","مجروراً","مجزوماً"], correct:0 },
+      { q:"الأسلوب الإنشائي يشمل:", options:["الأمر والنهي والاستفهام والتمني","الخبر المؤكد فقط","الجمل الفعلية فقط","الجمل الاسمية فقط"], correct:0 },
+      { q:"«لولا» حرف يفيد:", options:["امتناع لوجود","شرط جازم","نفي","استثناء"], correct:0 },
+      { q:"نوع الخبر في جملة «العلمُ نورٌ»:", options:["مفرد","جملة فعلية","جملة اسمية","شبه جملة"], correct:0 },
+      { q:"الجناس هو تشابه لفظين في:", options:["النطق مع اختلاف المعنى","المعنى فقط","عدد الحروف فقط","الوزن الشعري"], correct:0 },
+      { q:"الاستعارة أحد فنون علم:", options:["البيان","المعاني","العروض","النحو"], correct:0 },
+      { q:"«يا طالبَ العلمِ اجتهدْ» أسلوب:", options:["نداء","تعجب","قسم","شرط"], correct:0 },
+      { q:"علامة نصب جمع المؤنث السالم:", options:["الكسرة","الفتحة","الياء","الألف"], correct:0 },
+      { q:"في جملة «نجح الطالبُ المجتهدُ» الفاعل هو:", options:["الطالبُ","المجتهدُ","نجح","لا يوجد فاعل"], correct:0 }
+    ]
+  },
+  science: {
+    label: "علوم",
+    items: [
+      { q:"وحدة قياس القوة في النظام الدولي هي:", options:["نيوتن","جول","واط","باسكال"], correct:0 },
+      { q:"الرمز Na يمثل عنصر:", options:["الصوديوم","النيتروجين","النيكل","النحاس"], correct:0 },
+      { q:"جهاز قياس شدة التيار الكهربائي:", options:["الأميتر","الفولتميتر","الأوميتر","الباروميتر"], correct:0 },
+      { q:"عملية البناء الضوئي تحدث داخل:", options:["البلاستيدات الخضراء","الميتوكوندريا","النواة","الريبوسومات"], correct:0 },
+      { q:"عدد الكروموسومات في الخلية الجسدية للإنسان:", options:["46","23","44","48"], correct:0 },
+      { q:"الغاز الرئيسي المسبب لظاهرة الاحتباس الحراري:", options:["ثاني أكسيد الكربون","الأكسجين","النيتروجين","الهيليوم"], correct:0 },
+      { q:"«لكل فعل رد فعل مساوٍ له في المقدار ومضاد في الاتجاه» هو نص قانون:", options:["نيوتن الثالث","نيوتن الأول","بويل","أوم"], correct:0 },
+      { q:"الجزيء المسؤول عن نقل الصفات الوراثية:", options:["DNA","ATP","الجلوكوز","الدهون"], correct:0 },
+      { q:"حالة المادة التي لها شكل وحجم ثابتان:", options:["الصلبة","السائلة","الغازية","البلازمية"], correct:0 },
+      { q:"العضو المسؤول عن ضخ الدم في جسم الإنسان:", options:["القلب","الكبد","الرئة","الكلية"], correct:0 },
+      { q:"وحدة قياس الطاقة هي:", options:["الجول","النيوتن","الأمبير","المتر"], correct:0 },
+      { q:"العدد الذري لعنصر الهيدروجين هو:", options:["1","2","8","6"], correct:0 },
+      { q:"الأوعية التي تحمل الدم من القلب إلى أعضاء الجسم:", options:["الشرايين","الأوردة","الشعيرات الدموية فقط","لا شيء مما سبق"], correct:0 },
+      { q:"من مصادر الطاقة المتجددة:", options:["الطاقة الشمسية","الفحم","البترول","الغاز الطبيعي"], correct:0 },
+      { q:"انتقال الحرارة عبر الفراغ يسمى:", options:["الإشعاع","التوصيل","الحمل","الانصهار"], correct:0 }
+    ]
+  },
+  social: {
+    label: "دراسات",
+    items: [
+      { q:"تقع مصر بشكل أساسي في قارة:", options:["أفريقيا","آسيا","أوروبا","أمريكا"], correct:0 },
+      { q:"نهر النيل يصب في:", options:["البحر المتوسط","البحر الأحمر","المحيط الأطلسي","الخليج العربي"], correct:0 },
+      { q:"العاصمة الإدارية الجديدة لمصر تقع شرق:", options:["القاهرة","الإسكندرية","أسوان","سيناء"], correct:0 },
+      { q:"قامت ثورة 23 يوليو في عام:", options:["1952","1919","1973","1936"], correct:0 },
+      { q:"وقعت حرب أكتوبر المجيدة في عام:", options:["1973","1967","1956","1948"], correct:0 },
+      { q:"من أهم الموارد الاقتصادية الاستراتيجية لمصر:", options:["قناة السويس","الغابات الاستوائية","الثلوج الدائمة","المحيطات"], correct:0 },
+      { q:"أكبر قارات العالم مساحةً:", options:["آسيا","أفريقيا","أوروبا","أستراليا"], correct:0 },
+      { q:"خط الاستواء يمر تقريباً بـ:", options:["وسط الكرة الأرضية","القطب الشمالي","القطب الجنوبي","لا شيء مما سبق"], correct:0 },
+      { q:"من أهم عوامل قيام الحضارة المصرية القديمة:", options:["نهر النيل","المناخ القطبي","الصحراء وحدها","لا شيء مما سبق"], correct:0 },
+      { q:"وُقّعت معاهدة السلام المصرية الإسرائيلية عام:", options:["1979","1973","1967","1990"], correct:0 },
+      { q:"يقع الهرم الأكبر في منطقة:", options:["الجيزة","الأقصر","أسوان","الإسكندرية"], correct:0 },
+      { q:"من الدول التي تشترك مع مصر في نهر النيل:", options:["السودان","ليبيا","تونس","الجزائر"], correct:0 },
+      { q:"المناخ السائد في معظم أراضي مصر هو مناخ:", options:["صحراوي جاف","استوائي ممطر","قطبي بارد","معتدل ماطر"], correct:0 },
+      { q:"شبه جزيرة سيناء تقع في قارة:", options:["آسيا","أفريقيا","أوروبا","أستراليا"], correct:0 },
+      { q:"من أهم الممرات الملاحية الدولية التي تملكها مصر:", options:["قناة السويس","مضيق جبل طارق","قناة بنما","مضيق ماجلان"], correct:0 }
+    ]
+  },
+  math: {
+    label: "رياضيات",
+    items: [
+      { q:"ناتج فك (2س + 3)(س − 1) هو:", options:["2س² + س − 3","2س² − س + 3","2س² + 5س − 3","س² + س − 3"], correct:0 },
+      { q:"مجموع زوايا المثلث يساوي:", options:["180°","360°","90°","270°"], correct:0 },
+      { q:"نظرية فيثاغورث تُطبَّق على:", options:["المثلث قائم الزاوية","المثلث متساوي الأضلاع","الدائرة","المربع فقط"], correct:0 },
+      { q:"حل المعادلة: س + 5 = 12 هو:", options:["س = 7","س = 17","س = 5","س = 12"], correct:0 },
+      { q:"مساحة الدائرة تساوي:", options:["π × نق²","2π × نق","π × القطر","نق²"], correct:0 },
+      { q:"العدد الذي إذا ضُرب في نفسه ساوى 49 هو:", options:["7","6","8","9"], correct:0 },
+      { q:"مجموع زوايا الشكل الرباعي يساوي:", options:["360°","180°","270°","90°"], correct:0 },
+      { q:"ناتج جمع الكسرين ½ + ⅓ هو:", options:["5/6","2/5","1/6","3/5"], correct:0 },
+      { q:"المعادلة من الدرجة الثانية تُسمى معادلة:", options:["تربيعية","خطية","تكعيبية","أسية"], correct:0 },
+      { q:"طول ضلع مربع مساحته 64 سم² هو:", options:["8 سم","16 سم","32 سم","4 سم"], correct:0 },
+      { q:"العدد الأولي من بين الأعداد التالية:", options:["13","15","21","9"], correct:0 },
+      { q:"ميل الخط المستقيم y = 2x + 3 يساوي:", options:["2","3","−2","1"], correct:0 },
+      { q:"حجم مكعب طول ضلعه 3 سم يساوي:", options:["27 سم³","9 سم³","18 سم³","6 سم³"], correct:0 },
+      { q:"الزاوية التي قياسها بين 90° و180° تُسمى:", options:["منفرجة","حادة","قائمة","مستقيمة"], correct:0 },
+      { q:"ناتج (−3) × (−4) يساوي:", options:["12","−12","7","−7"], correct:0 }
+    ]
+  },
+  english: {
+    label: "English",
+    items: [
+      { q:"Choose the correct verb: \"She ___ to school every day.\"", options:["goes","go","going","gone"], correct:0 },
+      { q:"The opposite of \"difficult\" is:", options:["easy","hard","complex","strong"], correct:0 },
+      { q:"The past tense of \"write\" is:", options:["wrote","writed","writen","writting"], correct:0 },
+      { q:"Choose the correct sentence:", options:["He doesn't like coffee.","He don't likes coffee.","He not like coffee.","He isn't like coffee."], correct:0 },
+      { q:"\"Although it was raining, we went out.\" — 'Although' shows:", options:["contrast","reason","result","time"], correct:0 },
+      { q:"The plural of \"child\" is:", options:["children","childs","childes","child"], correct:0 },
+      { q:"Choose the correct preposition: \"She is interested ___ music.\"", options:["in","on","at","for"], correct:0 },
+      { q:"A synonym of \"happy\" is:", options:["joyful","sad","angry","tired"], correct:0 },
+      { q:"\"I have ___ finished my homework.\"", options:["already","yesterday","ago","last"], correct:0 },
+      { q:"Choose the correct comparative: \"This book is ___ than that one.\"", options:["more interesting","most interesting","interesting","interestinger"], correct:0 },
+      { q:"The passive voice of \"They built the house\" is:", options:["The house was built by them.","The house built by them.","They was built the house.","The house is build by them."], correct:0 },
+      { q:"Choose the correct question tag: \"You like tea, ___?\"", options:["don't you","do you","aren't you","isn't it"], correct:0 },
+      { q:"\"If I ___ rich, I would travel the world.\"", options:["were","was","am","be"], correct:0 },
+      { q:"Which of the following is a noun?", options:["happiness","quickly","beautiful","run"], correct:0 },
+      { q:"Choose the correct spelling:", options:["necessary","neccessary","necesary","neccesary"], correct:0 }
+    ]
+  }
+};
+
+/* ==================================================================
+   2) بناء اختبار عشوائي: 4 أسئلة من كل مادة (20 سؤالاً) + خلط الخيارات
+   ================================================================== */
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildQuiz(){
+  let quiz = [];
+  for(const key of Object.keys(QUESTION_BANK)){
+    const subject = QUESTION_BANK[key];
+    const picked = shuffle(subject.items).slice(0,4);
+    picked.forEach(item=>{
+      const correctText = item.options[item.correct];
+      const shuffledOptions = shuffle(item.options);
+      quiz.push({
+        subjectKey: key,
+        subjectLabel: subject.label,
+        question: item.q,
+        options: shuffledOptions,
+        correctIndex: shuffledOptions.indexOf(correctText)
+      });
+    });
+  }
+  return shuffle(quiz);
+}
+
+/* ==================================================================
+   3) حالة التطبيق والتنقل بين الشاشات
+   ================================================================== */
+const screens = {
+  welcome: document.getElementById('screen-welcome'),
+  quiz: document.getElementById('screen-quiz'),
+  result: document.getElementById('screen-result'),
+  admin: document.getElementById('screen-admin')
+};
+function showScreen(name){
+  Object.values(screens).forEach(s=>s.classList.remove('active'));
+  screens[name].classList.add('active');
+}
+
+let state = {
+  name: "",
+  quiz: [],
+  currentIndex: 0,
+  selectedOptionIndex: null,
+  answers: [],
+  score: 0,
+  subjectScores: {},
+  timerInterval: null,
+  timeLeft: 20*60,
+  tabSwitchCount: 0,
+  flagged: false,
+  finished: false
+};
+
+/* ==================================================================
+   4) شاشة الترحيب: التحقق من الاسم + لوحة الصدارة العامة
+   ================================================================== */
+const nameInput = document.getElementById('student-name');
+const nameError = document.getElementById('name-error');
+const startBtn = document.getElementById('start-btn');
+
+function isFullName(v){
+  return v.trim().split(/\s+/).filter(Boolean).length >= 3;
+}
+
+startBtn.addEventListener('click', ()=>{
+  const val = nameInput.value.trim();
+  if(!isFullName(val)){
+    nameError.classList.remove('hidden');
+    nameInput.classList.add('border-[var(--rose)]');
+    return;
+  }
+  nameError.classList.add('hidden');
+  nameInput.classList.remove('border-[var(--rose)]');
+  state.name = val.replace(/\s+/g,' ');
+  startQuiz();
+});
+
+function renderLeaderboard(list){
+  const container = document.getElementById('leaderboard-list');
+  const empty = document.getElementById('leaderboard-empty');
+  container.innerHTML = '';
+  if(!list.length){ empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  list.forEach((item, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'lb-row bg-white/5 rounded-lg px-3 py-2 text-sm';
+    const medal = idx===0 ? '🥇' : idx===1 ? '🥈' : idx===2 ? '🥉' : `${idx+1}`;
+    const flaggedTag = item.flagged ? ' <span class="text-[var(--rose)] text-[10px]">(مُلغى)</span>' : '';
+    row.innerHTML = `
+      <span class="flex items-center gap-2"><span class="w-6 text-center">${medal}</span><span class="font-semibold">${item.name}</span>${flaggedTag}</span>
+      <span class="text-[var(--gold)] font-display">${item.score}/${item.total}</span>`;
+    container.appendChild(row);
+  });
+}
+
+async function loadLeaderboard(){
+  const list = await fetchAllAttempts();
+  renderLeaderboard(list);
+  const validList = list.filter(x=>!x.flagged);
+  if(validList.length){
+    document.getElementById('top-scorer-name').textContent = validList[0].name;
+    document.getElementById('top-scorer-score').textContent = `${validList[0].score} / ${validList[0].total} نقطة`;
+    document.getElementById('top-scorer-banner').classList.remove('hidden');
+  }
+}
+
+/* ==================================================================
+   5) منطق الاختبار
+   ================================================================== */
+const questionText = document.getElementById('question-text');
+const optionsContainer = document.getElementById('options-container');
+const nextBtn = document.getElementById('next-btn');
+const qIndexEl = document.getElementById('q-index');
+const progressFill = document.getElementById('progress-fill');
+const subjectChip = document.getElementById('quiz-subject-chip');
+const timerEl = document.getElementById('quiz-timer');
+
+function startQuiz(){
+  state.quiz = buildQuiz();
+  state.currentIndex = 0;
+  state.selectedOptionIndex = null;
+  state.answers = [];
+  state.score = 0;
+  state.subjectScores = {};
+  state.tabSwitchCount = 0;
+  state.flagged = false;
+  state.finished = false;
+  state.timeLeft = 20*60;
+
+  showScreen('quiz');
+  renderQuestion();
+  startTimer();
+}
+
+function renderQuestion(){
+  const item = state.quiz[state.currentIndex];
+  questionText.textContent = item.question;
+  subjectChip.textContent = item.subjectLabel;
+  qIndexEl.textContent = state.currentIndex+1;
+  progressFill.style.width = `${((state.currentIndex)/20)*100 + 5}%`;
+
+  optionsContainer.innerHTML = '';
+  item.options.forEach((opt, idx)=>{
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'option-btn text-right rounded-xl px-4 py-3.5 bg-white/5';
+    btn.textContent = opt;
+    btn.addEventListener('click', ()=> selectOption(idx, btn));
+    optionsContainer.appendChild(btn);
+  });
+
+  state.selectedOptionIndex = null;
+  nextBtn.disabled = true;
+}
+
+function selectOption(idx){
+  if(state.selectedOptionIndex !== null) return;
+  state.selectedOptionIndex = idx;
+  const item = state.quiz[state.currentIndex];
+
+  [...optionsContainer.children].forEach((b,i)=>{
+    b.classList.remove('option-correct','option-wrong');
+    if(i === item.correctIndex) b.classList.add('option-correct');
+    else if(i === idx) b.classList.add('option-wrong');
+  });
+
+  const isCorrect = idx === item.correctIndex;
+  state.answers.push({ subject:item.subjectKey, correct:isCorrect });
+  if(isCorrect){
+    state.score++;
+    state.subjectScores[item.subjectKey] = (state.subjectScores[item.subjectKey]||0)+1;
+  }
+  nextBtn.disabled = false;
+}
+
+nextBtn.addEventListener('click', ()=>{
+  if(state.currentIndex < state.quiz.length-1){
+    state.currentIndex++;
+    renderQuestion();
+  } else {
+    finishQuiz(false);
+  }
+});
+
+function startTimer(){
+  clearInterval(state.timerInterval);
+  updateTimerDisplay();
+  state.timerInterval = setInterval(()=>{
+    state.timeLeft--;
+    updateTimerDisplay();
+    if(state.timeLeft <= 0){
+      clearInterval(state.timerInterval);
+      finishQuiz(false);
+    }
+  },1000);
+}
+function updateTimerDisplay(){
+  const m = Math.floor(state.timeLeft/60).toString().padStart(2,'0');
+  const s = (state.timeLeft%60).toString().padStart(2,'0');
+  timerEl.textContent = `${m}:${s}`;
+  if(state.timeLeft <= 60) timerEl.classList.add('text-[var(--rose)]');
+}
+
+async function finishQuiz(wasFlagged){
+  if(state.finished) return;
+  state.finished = true;
+  clearInterval(state.timerInterval);
+  state.flagged = wasFlagged || state.flagged;
+
+  showScreen('result');
+  document.getElementById('result-name').textContent = state.name;
+  document.getElementById('result-score').textContent = state.score;
+
+  const pct = Math.round((state.score/20)*100);
+  let msg = "أداء رائع، واصل التميز!";
+  let emoji = "🎉";
+  if(state.flagged){ msg = "تم إنهاء المحاولة تلقائياً بسبب مغادرة الصفحة أثناء الاختبار."; emoji = "🚫"; }
+  else if(pct >= 90){ msg = "أداء خرافي! أنت في طليعة المتنافسين 🔥"; emoji = "🏆"; }
+  else if(pct >= 70){ msg = "أداء قوي ومميز، استمر بهذا المستوى!"; emoji = "🎉"; }
+  else if(pct >= 50){ msg = "بداية جيدة، ذاكر أكثر وستتصدر المنافسة!"; emoji = "💪"; }
+  else { msg = "لا بأس، هذه فرصة للمراجعة والمحاولة مجدداً بقوة!"; emoji = "📘"; }
+  document.getElementById('result-sub').textContent = msg;
+  document.getElementById('result-emoji').textContent = emoji;
+
+  const breakdown = document.getElementById('result-breakdown');
+  breakdown.innerHTML = '';
+  Object.keys(QUESTION_BANK).forEach(key=>{
+    const div = document.createElement('div');
+    div.className = 'bg-white/5 rounded-lg py-2';
+    div.innerHTML = `<div class="text-[var(--gold)] font-bold font-display">${state.subjectScores[key]||0}/4</div><div class="text-[var(--muted)]">${QUESTION_BANK[key].label}</div>`;
+    breakdown.appendChild(div);
+  });
+
+  await submitAttempt({
+    name: state.name,
+    score: state.score,
+    total: 20,
+    subjectScores: state.subjectScores,
+    flagged: state.flagged,
+    tabSwitchCount: state.tabSwitchCount
+  });
+
+  loadLeaderboard();
+}
+
+document.getElementById('restart-btn').addEventListener('click', ()=>{
+  nameInput.value = '';
+  showScreen('welcome');
+  loadLeaderboard();
+});
+
+/* ==================================================================
+   6) نظام مكافحة الغش
+   ================================================================== */
+document.addEventListener('contextmenu', e=> e.preventDefault());
+document.addEventListener('selectstart', e=>{
+  if(e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+  e.preventDefault();
+});
+document.addEventListener('copy', e=> e.preventDefault());
+document.addEventListener('cut', e=> e.preventDefault());
+window.print = function(){ return false; };
+
+document.addEventListener('keydown', (e)=>{
+  const blockedCombo =
+    (e.ctrlKey && ['p','s','c','u'].includes(e.key.toLowerCase())) ||
+    (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) ||
+    e.key === 'F12' ||
+    e.key === 'PrintScreen';
+  if(blockedCombo){
+    e.preventDefault();
+    if(e.key === 'PrintScreen'){
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText('').catch(()=>{});
+      }
+      triggerCheatWarning('حاولت أخذ لقطة شاشة! تم رصد المحاولة.');
+    }
+  }
+});
+
+let cheatOverlayShown = false;
+const cheatOverlay = document.getElementById('cheat-overlay');
+const cheatMessage = document.getElementById('cheat-message');
+document.getElementById('cheat-ack-btn').addEventListener('click', ()=>{
+  cheatOverlay.classList.remove('active');
+  cheatOverlayShown = false;
+});
+
+function triggerCheatWarning(customMsg){
+  if(!screens.quiz.classList.contains('active')) return;
+  if(state.finished) return;
+
+  state.tabSwitchCount++;
+
+  if(state.tabSwitchCount >= 2){
+    cheatMessage.textContent = 'تم رصد مغادرة متكررة للصفحة أثناء الاختبار. جارٍ إنهاء المحاولة وإرسال نتيجتك الحالية فوراً.';
+    cheatOverlay.classList.add('active');
+    setTimeout(()=>{
+      cheatOverlay.classList.remove('active');
+      finishQuiz(true);
+    }, 2200);
+    return;
+  }
+
+  if(!cheatOverlayShown){
+    cheatOverlayShown = true;
+    cheatMessage.textContent = customMsg || 'لاحظنا أنك غادرت شاشة الاختبار. الخروج مرة أخرى سيؤدي لإنهاء المحاولة تلقائياً وإرسال نتيجتك الحالية.';
+    cheatOverlay.classList.add('active');
+  }
+}
+
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden) triggerCheatWarning();
+});
+window.addEventListener('blur', ()=>{
+  if(!document.hidden) triggerCheatWarning();
+});
+
+/* ==================================================================
+   7) لوحة الآدمن المخفية — تظهر فقط عبر ?admin=1234
+   ================================================================== */
+async function initAdminIfNeeded(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('admin') === ADMIN_SECRET){
+    showScreen('admin');
+    await loadAdminTable();
+    document.getElementById('admin-refresh').addEventListener('click', loadAdminTable);
+    return true;
+  }
+  return false;
+}
+
+async function loadAdminTable(){
+  const tbody = document.getElementById('admin-table-body');
+  const emptyMsg = document.getElementById('admin-empty');
+  tbody.innerHTML = '';
+  const list = await fetchAllAttempts();
+  if(!list.length){ emptyMsg.classList.remove('hidden'); return; }
+  emptyMsg.classList.add('hidden');
+  let i = 1;
+  list.forEach(d=>{
+    const pct = Math.round(((d.score||0)/(d.total||20))*100);
+    const time = d.time ? d.time.toLocaleString('ar-EG') : '—';
+    const statusBadge = d.flagged
+      ? `<span class="text-[var(--rose)]">مُلغى (خروج من الصفحة)</span>`
+      : `<span class="text-[var(--emerald)]">مكتمل</span>`;
+    const tr = document.createElement('tr');
+    tr.className = 'border-t border-white/5';
+    tr.innerHTML = `
+      <td class="p-3 text-[var(--muted)]">${i++}</td>
+      <td class="p-3 font-semibold">${d.name||'—'}</td>
+      <td class="p-3">${d.score}/${d.total}</td>
+      <td class="p-3">${pct}%</td>
+      <td class="p-3 text-[var(--muted)] text-xs">${time}</td>
+      <td class="p-3 text-xs">${statusBadge}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ==================================================================
+   8) بدء التشغيل الفوري (لا ينتظر Firebase)
+   ================================================================== */
+(async function init(){
+  const isAdmin = await initAdminIfNeeded();
+  if(!isAdmin){
+    showScreen('welcome');
+    loadLeaderboard();
+  }
+})();
+</script>
+</body>
+</html>
