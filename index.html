@@ -234,30 +234,20 @@
 
 <script>
 /* ==================================================================
-   0) إعداد Baserow — القاعدة الوحيدة المستخدمة في هذا الموقع.
-   استبدل القيم الثلاث دي ببيانات مشروعك على Baserow.
-   (لو مستضيف Baserow بنفسك غيّر BASEROW_API_URL كمان)
+   0) إعداد jsonbin.io — قاعدة بيانات صغيرة جداً (صندوق JSON واحد بس).
+   استبدل القيمتين دول ببيانات حسابك.
    ================================================================== */
-const BASEROW_API_URL   = "https://api.baserow.io";
-const BASEROW_TOKEN     = "xwC9MaeuoZwmqVHDm2fz1h7vVYYj40I1";
-const BASEROW_TABLE_ID  = "1150483";
+const JSONBIN_API_URL  = "https://api.jsonbin.io/v3/b";
+const JSONBIN_BIN_ID   = "6a8a0c92f5f4af5e29367cef";
+const JSONBIN_API_KEY  = "$2a$10$H8YgvYa.7XiLYSdd3W7XaOU.C5adwWP6aZJrZ5oHlEps5rx.P4Ei.";
 
 /* غيّر هذا الكود السري قبل النشر */
 const ADMIN_SECRET = "1234";
 
-/* عدد الأسئلة والوقت */
 const QUESTIONS_PER_SUBJECT_NORMAL = 10;
 const QUESTIONS_PER_SUBJECT_HARD   = 2;
 const TOTAL_QUESTIONS = 60;
 const EXAM_SECONDS = 30*60;
-
-/* ==================================================================
-   جدول Baserow المطلوب — أنشئ جدول باسم attempts بالأعمدة التالية بالظبط:
-   Name (Single line text) | Score (Number) | Total (Number)
-   Date (Single line text بصيغة YYYY-MM-DD) | DurationSeconds (Number)
-   Flagged (Boolean) | TabSwitchCount (Number) | SubjectScores (Long text - JSON)
-   Timestamp (Single line text - ISO)
-   ================================================================== */
 
 function todayStr(){
   const d = new Date();
@@ -268,62 +258,58 @@ function todayStr(){
 }
 function normalizeName(n){ return n.trim().replace(/\s+/g,' ').toLowerCase(); }
 
-/* ---------- طبقة اتصال Baserow ---------- */
-function baserowConfigured(){
-  return !BASEROW_TOKEN.startsWith('REPLACE_') && !BASEROW_TABLE_ID.startsWith('REPLACE_');
+/* ---------- طبقة اتصال jsonbin.io (صندوق JSON واحد فيه كل المحاولات) ---------- */
+function jsonbinConfigured(){
+  return !JSONBIN_BIN_ID.startsWith('REPLACE_') && !JSONBIN_API_KEY.startsWith('REPLACE_');
 }
-async function baserowRequest(path, options={}){
-  const res = await fetch(`${BASEROW_API_URL}${path}`, {
-    ...options,
-    headers: { 'Authorization': `Token ${BASEROW_TOKEN}`, 'Content-Type':'application/json', ...(options.headers||{}) }
-  });
-  if(!res.ok){ throw new Error(`Baserow error ${res.status}`); }
-  return res.json();
-}
-async function baserowListRows(query=''){
-  if(!baserowConfigured()) return [];
+async function jsonbinGetAttempts(){
+  if(!jsonbinConfigured()) return [];
   try{
-    const data = await baserowRequest(`/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=200${query}`);
-    return data.results || [];
-  }catch(e){ console.warn('تعذر الاتصال بـ Baserow', e); return []; }
-}
-async function baserowCreateRow(fields){
-  if(!baserowConfigured()){
-    console.warn('Baserow غير مُعد بعد — لن يتم حفظ النتيجة على السيرفر.');
-    return null;
-  }
-  try{
-    return await baserowRequest(`/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true`, {
-      method:'POST', body: JSON.stringify(fields)
+    const res = await fetch(`${JSONBIN_API_URL}/${JSONBIN_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY, 'X-Bin-Meta': 'false' }
     });
-  }catch(e){ console.warn('فشل إرسال النتيجة إلى Baserow', e); return null; }
+    if(!res.ok) throw new Error('jsonbin get failed: '+res.status);
+    const data = await res.json();
+    return Array.isArray(data.attempts) ? data.attempts : [];
+  }catch(e){ console.warn('تعذر الاتصال بـ jsonbin', e); return []; }
+}
+async function jsonbinSaveAttempts(attempts){
+  if(!jsonbinConfigured()) return false;
+  try{
+    const res = await fetch(`${JSONBIN_API_URL}/${JSONBIN_BIN_ID}`, {
+      method:'PUT',
+      headers: { 'Content-Type':'application/json', 'X-Master-Key': JSONBIN_API_KEY },
+      body: JSON.stringify({ attempts })
+    });
+    return res.ok;
+  }catch(e){ console.warn('فشل حفظ البيانات في jsonbin', e); return false; }
+}
+async function addAttemptRemote(newAttempt){
+  const current = await jsonbinGetAttempts();
+  current.push(newAttempt);
+  await jsonbinSaveAttempts(current);
 }
 
-/* ---------- التخزين المحلي (localStorage) لمنع التكرار بسرعة قبل مراجعة Baserow ---------- */
-const LOCAL_LOG_KEY = 'quiz_attempts_log_v2';
+/* ---------- تخزين محلي احتياطي (localStorage) لمنع التكرار بسرعة ---------- */
+const LOCAL_LOG_KEY = 'quiz_attempts_log_v3';
 function localGetLog(){ try{ return JSON.parse(localStorage.getItem(LOCAL_LOG_KEY)||'[]'); }catch(e){ return []; } }
 function localAddLog(entry){ const log = localGetLog(); log.push(entry); localStorage.setItem(LOCAL_LOG_KEY, JSON.stringify(log)); }
 function localFindTodayAttempt(name, date){
   const key = normalizeName(name);
   return localGetLog().find(a => normalizeName(a.name) === key && a.date === date) || null;
 }
-
-/* التحقق الشامل (محلي أولاً للسرعة، ثم Baserow للتأكد من كل الأجهزة) */
 async function findExistingTodayAttempt(name, date){
   const local = localFindTodayAttempt(name, date);
   if(local) return local;
   const key = normalizeName(name);
-  const rows = await baserowListRows(`&filter__Date__equal=${encodeURIComponent(date)}`);
-  const match = rows.find(r => normalizeName(r.Name||'') === key);
-  if(match){
-    return { name: match.Name, date: match.Date, score: match.Score, total: match.Total };
-  }
+  const rows = await jsonbinGetAttempts();
+  const match = rows.find(r => normalizeName(r.Name||'') === key && r.Date === date);
+  if(match) return { name: match.Name, date: match.Date, score: match.Score, total: match.Total };
   return null;
 }
 
 /* ==================================================================
-   1) مولّد عشوائي ثابت لكل يوم (Seeded PRNG) — عشان كل الطلاب في نفس
-      اليوم ياخدوا نفس الـ 60 سؤال بالظبط، وبكرة تتغير تلقائياً.
+   1) مولّد عشوائي ثابت لكل يوم (Seeded PRNG)
    ================================================================== */
 function seededRandom(seedStr){
   let h = 1779033703 ^ seedStr.length;
@@ -449,8 +435,7 @@ const QUESTION_BANK = {
 };
 
 /* ==================================================================
-   3) بناء امتحان اليوم: 10 عادي + 2 صعب من كل مادة = 60 سؤالاً،
-      وكلها مبنية على مولّد ثابت بتاريخ اليوم (نفس الأسئلة لكل الطلاب اليوم)
+   3) بناء امتحان اليوم: 10 عادي + 2 صعب من كل مادة = 60 سؤالاً
    ================================================================== */
 function buildDailyQuiz(dateStr){
   const rng = seededRandom('quiz-' + dateStr);
@@ -465,11 +450,8 @@ function buildDailyQuiz(dateStr){
       const correctText = item.options[item.correct];
       const shuffledOptions = seededShuffle(item.options, rng);
       quiz.push({
-        subjectKey: key,
-        subjectLabel: subject.label,
-        level: item.level,
-        question: item.q,
-        options: shuffledOptions,
+        subjectKey: key, subjectLabel: subject.label, level: item.level,
+        question: item.q, options: shuffledOptions,
         correctIndex: shuffledOptions.indexOf(correctText)
       });
     });
@@ -481,16 +463,11 @@ function buildDailyQuiz(dateStr){
    4) حالة التطبيق والتنقل بين الشاشات
    ================================================================== */
 const screens = {
-  welcome: document.getElementById('screen-welcome'),
-  quiz: document.getElementById('screen-quiz'),
-  result: document.getElementById('screen-result'),
-  history: document.getElementById('screen-history'),
+  welcome: document.getElementById('screen-welcome'), quiz: document.getElementById('screen-quiz'),
+  result: document.getElementById('screen-result'), history: document.getElementById('screen-history'),
   admin: document.getElementById('screen-admin')
 };
-function showScreen(name){
-  Object.values(screens).forEach(s=>s.classList.remove('active'));
-  screens[name].classList.add('active');
-}
+function showScreen(name){ Object.values(screens).forEach(s=>s.classList.remove('active')); screens[name].classList.add('active'); }
 
 let state = {
   name: "", quiz: [], currentIndex: 0, selectedOptionIndex: null,
@@ -526,10 +503,7 @@ startBtn.addEventListener('click', async ()=>{
   startBtn.disabled = false;
   startBtn.textContent = 'ابدأ امتحان اليوم 🚀';
 
-  if(existing){
-    showLocked(existing);
-    return;
-  }
+  if(existing){ showLocked(existing); return; }
   state.name = val.replace(/\s+/g,' ');
   startQuiz();
 });
@@ -541,12 +515,9 @@ function showLocked(attempt){
     `لقد أديت امتحان اليوم بالفعل يا ${attempt.name}، ودرجتك هي (${attempt.score} من ${attempt.total||TOTAL_QUESTIONS})! عد غداً لمنافسة جديدة.`;
 }
 document.getElementById('locked-back-btn').addEventListener('click', ()=>{
-  lockedCard.classList.add('hidden');
-  entryCard.classList.remove('hidden');
-  nameInput.value = '';
+  lockedCard.classList.add('hidden'); entryCard.classList.remove('hidden'); nameInput.value = '';
 });
 
-/* لوحة الصدارة */
 let lbMode = 'today';
 document.getElementById('lb-tab-today').addEventListener('click', ()=>{ lbMode='today'; setLbTabs(); loadLeaderboard(); });
 document.getElementById('lb-tab-all').addEventListener('click', ()=>{ lbMode='all'; setLbTabs(); loadLeaderboard(); });
@@ -555,11 +526,7 @@ function setLbTabs(){
   document.getElementById('lb-tab-all').classList.toggle('active', lbMode==='all');
 }
 function setLbStatus(txt){ const el=document.getElementById('lb-status'); if(el) el.textContent = txt; }
-
-function fmtDuration(sec){
-  const m = Math.floor(sec/60), s = sec%60;
-  return `${m}:${String(s).padStart(2,'0')}`;
-}
+function fmtDuration(sec){ const m=Math.floor(sec/60), s=sec%60; return `${m}:${String(s).padStart(2,'0')}`; }
 
 function renderLeaderboard(list){
   const container = document.getElementById('leaderboard-list');
@@ -580,12 +547,13 @@ function renderLeaderboard(list){
 }
 
 async function loadLeaderboard(){
-  setLbStatus(baserowConfigured() ? '' : 'Baserow غير مُعد بعد');
+  setLbStatus(jsonbinConfigured() ? '' : 'قاعدة البيانات غير مُعدة بعد');
   const date = todayStr();
-  const q = lbMode==='today' ? `&filter__Date__equal=${encodeURIComponent(date)}&order_by=-Score,DurationSeconds` : `&order_by=-Score,DurationSeconds`;
-  const rows = await baserowListRows(q);
-  const clean = rows.filter(r=>!r.Flagged);
+  const all = await jsonbinGetAttempts();
+  let rows = lbMode==='today' ? all.filter(r=>r.Date===date) : all.slice();
+  rows.sort((a,b)=> (b.Score - a.Score) || ((a.DurationSeconds||0) - (b.DurationSeconds||0)));
   renderLeaderboard(rows);
+  const clean = rows.filter(r=>!r.Flagged);
   if(clean.length){
     document.getElementById('top-scorer-name').textContent = clean[0].Name;
     document.getElementById('top-scorer-score').textContent = `${clean[0].Score} / ${clean[0].Total} نقطة`;
@@ -609,19 +577,10 @@ const timerEl = document.getElementById('quiz-timer');
 
 function startQuiz(){
   state.quiz = buildDailyQuiz(todayStr());
-  state.currentIndex = 0;
-  state.selectedOptionIndex = null;
-  state.score = 0;
-  state.subjectScores = {};
-  state.tabSwitchCount = 0;
-  state.flagged = false;
-  state.finished = false;
-  state.timeLeft = EXAM_SECONDS;
-  state.startedAt = Date.now();
-
-  showScreen('quiz');
-  renderQuestion();
-  startTimer();
+  state.currentIndex = 0; state.selectedOptionIndex = null; state.score = 0;
+  state.subjectScores = {}; state.tabSwitchCount = 0; state.flagged = false;
+  state.finished = false; state.timeLeft = EXAM_SECONDS; state.startedAt = Date.now();
+  showScreen('quiz'); renderQuestion(); startTimer();
 }
 
 function renderQuestion(){
@@ -654,8 +613,7 @@ function selectOption(idx){
     if(i === item.correctIndex) b.classList.add('option-correct');
     else if(i === idx) b.classList.add('option-wrong');
   });
-  const isCorrect = idx === item.correctIndex;
-  if(isCorrect){
+  if(idx === item.correctIndex){
     state.score++;
     state.subjectScores[item.subjectKey] = (state.subjectScores[item.subjectKey]||0)+1;
   }
@@ -663,12 +621,8 @@ function selectOption(idx){
 }
 
 nextBtn.addEventListener('click', ()=>{
-  if(state.currentIndex < state.quiz.length-1){
-    state.currentIndex++;
-    renderQuestion();
-  } else {
-    finishQuiz(false);
-  }
+  if(state.currentIndex < state.quiz.length-1){ state.currentIndex++; renderQuestion(); }
+  else { finishQuiz(false); }
 });
 
 function startTimer(){
@@ -677,10 +631,7 @@ function startTimer(){
   state.timerInterval = setInterval(()=>{
     state.timeLeft--;
     updateTimerDisplay();
-    if(state.timeLeft <= 0){
-      clearInterval(state.timerInterval);
-      finishQuiz(false); // العداد التنازلي يغلق الامتحان ويرفع الإجابات تلقائياً
-    }
+    if(state.timeLeft <= 0){ clearInterval(state.timerInterval); finishQuiz(false); }
   },1000);
 }
 function updateTimerDisplay(){
@@ -725,9 +676,9 @@ async function finishQuiz(wasFlagged){
   const attemptData = {
     Name: state.name, Score: state.score, Total: TOTAL_QUESTIONS, Date: date,
     DurationSeconds: durationSeconds, Flagged: state.flagged, TabSwitchCount: state.tabSwitchCount,
-    SubjectScores: JSON.stringify(state.subjectScores), Timestamp: new Date().toISOString()
+    SubjectScores: state.subjectScores, Timestamp: new Date().toISOString()
   };
-  await baserowCreateRow(attemptData);
+  await addAttemptRemote(attemptData);
   localAddLog({ name: state.name, date, score: state.score, total: TOTAL_QUESTIONS });
 
   loadLeaderboard();
@@ -757,8 +708,8 @@ document.getElementById('history-search-btn').addEventListener('click', async ()
   list.innerHTML = '';
   if(!name){ return; }
   const key = normalizeName(name);
-  const rows = await baserowListRows(`&order_by=-Date`);
-  const mine = rows.filter(r => normalizeName(r.Name||'') === key);
+  const rows = await jsonbinGetAttempts();
+  const mine = rows.filter(r => normalizeName(r.Name||'') === key).sort((a,b)=> (b.Date||'').localeCompare(a.Date||''));
   if(!mine.length){ empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
   mine.forEach(r=>{
@@ -799,10 +750,8 @@ let cheatOverlayShown = false;
 const cheatOverlay = document.getElementById('cheat-overlay');
 const cheatMessage = document.getElementById('cheat-message');
 document.getElementById('cheat-ack-btn').addEventListener('click', ()=>{
-  cheatOverlay.classList.remove('active');
-  cheatOverlayShown = false;
+  cheatOverlay.classList.remove('active'); cheatOverlayShown = false;
 });
-
 function triggerCheatWarning(customMsg){
   if(!screens.quiz.classList.contains('active')) return;
   if(state.finished) return;
@@ -828,8 +777,7 @@ window.addEventListener('blur', ()=>{ if(!document.hidden) triggerCheatWarning()
 async function initAdminIfNeeded(){
   const params = new URLSearchParams(window.location.search);
   if(params.get('admin') === ADMIN_SECRET){
-    showScreen('admin');
-    await loadAdminTable();
+    showScreen('admin'); await loadAdminTable();
     document.getElementById('admin-refresh').addEventListener('click', loadAdminTable);
     return true;
   }
@@ -839,7 +787,8 @@ async function loadAdminTable(){
   const tbody = document.getElementById('admin-table-body');
   const emptyMsg = document.getElementById('admin-empty');
   tbody.innerHTML = '';
-  const rows = await baserowListRows(`&order_by=-Date,-Score`);
+  const rows = await jsonbinGetAttempts();
+  rows.sort((a,b)=> (b.Date||'').localeCompare(a.Date||'') || (b.Score - a.Score));
   if(!rows.length){ emptyMsg.classList.remove('hidden'); return; }
   emptyMsg.classList.add('hidden');
   let i = 1;
@@ -867,11 +816,7 @@ async function loadAdminTable(){
    ================================================================== */
 (async function init(){
   const isAdmin = await initAdminIfNeeded();
-  if(!isAdmin){
-    showScreen('welcome');
-    setLbTabs();
-    loadLeaderboard();
-  }
+  if(!isAdmin){ showScreen('welcome'); setLbTabs(); loadLeaderboard(); }
 })();
 </script>
 </body>
