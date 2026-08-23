@@ -19,7 +19,6 @@
   body{ user-select:none; -webkit-user-select:none; -moz-user-select:none; }
   input, textarea{ user-select:text; -webkit-user-select:text; }
   ::selection{ background:transparent; }
-
   .bg-arena{
     background:
       radial-gradient(circle at 15% 10%, rgba(139,124,246,.18), transparent 40%),
@@ -29,29 +28,24 @@
   }
   .card{ background:linear-gradient(180deg, var(--bg-card), var(--bg-soft)); border:1px solid rgba(245,185,66,.12); }
   .hexagon{ clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0% 50%); }
-
   .btn-gold{ background:linear-gradient(135deg, var(--gold), var(--gold-2)); color:#241505; box-shadow:0 8px 24px -8px rgba(245,185,66,.55); }
   .btn-gold:disabled{ opacity:.45; box-shadow:none; }
   .btn-gold:active:not(:disabled){ transform:translateY(1px) scale(.99); }
   .btn-ghost{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); }
-
+  .btn-danger{ background:linear-gradient(135deg, #FB5678, #C22F4C); color:#fff; }
   .option-btn{ transition:all .15s ease; border:1.5px solid rgba(255,255,255,.08); cursor:pointer; }
   .option-btn:hover{ border-color:rgba(245,185,66,.5); background:rgba(245,185,66,.06); }
   .option-correct{ border-color:var(--emerald)!important; background:rgba(34,201,155,.14)!important; }
   .option-wrong{ border-color:var(--rose)!important; background:rgba(251,86,120,.14)!important; }
   .hard-tag{ background:rgba(251,86,120,.16); color:var(--rose); border:1px solid rgba(251,86,120,.35); }
-
   .screen{ display:none; }
   .screen.active{ display:block; animation:rise .35s ease; }
   @keyframes rise{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)} }
-
   .progress-track{ background:rgba(255,255,255,.08); }
   .progress-fill{ background:linear-gradient(90deg, var(--violet), var(--gold)); transition:width .4s ease; }
   .subject-chip{ font-family:'Changa',sans-serif; letter-spacing:.5px; }
-
   #cheat-overlay{ position:fixed; inset:0; z-index:60; display:none; }
   #cheat-overlay.active{ display:flex; }
-
   .medal-glow{ animation:pulse-medal 2.4s ease-in-out infinite; }
   @keyframes pulse-medal{ 0%,100%{ box-shadow:0 0 0 0 rgba(245,185,66,.35);} 50%{ box-shadow:0 0 0 14px rgba(245,185,66,0);} }
   @media(prefers-reduced-motion: reduce){ *{ animation:none!important; transition:none!important; } }
@@ -70,43 +64,41 @@
   <section id="screen-welcome" class="screen active w-full max-w-lg">
     <div class="text-center mb-6">
       <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs subject-chip text-[var(--gold)] mb-4">
-        منهج 2026 • الصف الثالث الإعدادي • امتحان اليوم
+        منهج 2026 • الصف الثالث الإعدادي • جولة تتجدد كل 10 ساعات
       </div>
       <h1 class="font-display text-4xl md:text-5xl font-bold leading-tight">
         الحلبة <span class="text-[var(--gold)]">المعرفية</span>
       </h1>
       <p class="text-[var(--muted)] mt-3 text-sm md:text-base">
-        60 سؤالاً في 30 دقيقة، فيهم 10 أسئلة فائقة الصعوبة… امتحان واحد كل يوم لكل طالب!
+        60 سؤالاً في 30 دقيقة، فيهم 10 أسئلة فائقة الصعوبة تختبر التفكير المنطقي… محاولة واحدة لكل جهاز في كل جولة!
       </p>
+      <p class="text-xs text-[var(--gold)] mt-2 font-display">⏳ الجولة القادمة بعد: <span id="countdown-timer">--:--:--</span></p>
     </div>
 
-    <!-- Top scorer banner (today) -->
     <div id="top-scorer-banner" class="hidden mb-6">
       <div class="hexagon card medal-glow px-6 py-4 flex items-center gap-4 mx-auto max-w-sm">
         <div class="text-3xl">🏆</div>
         <div class="text-right flex-1">
-          <p class="text-[10px] text-[var(--muted)] subject-chip">متصدّر اليوم</p>
+          <p class="text-[10px] text-[var(--muted)] subject-chip">متصدّر الجولة الحالية</p>
           <p class="font-display font-bold text-lg text-[var(--gold)]" id="top-scorer-name">—</p>
           <p class="text-xs text-[var(--muted)]" id="top-scorer-score"></p>
         </div>
       </div>
     </div>
 
-    <!-- Public leaderboard -->
     <div class="card rounded-2xl p-5 mb-6">
       <div class="flex items-center justify-between mb-3">
         <h3 class="font-display text-sm text-[var(--gold)] flex items-center gap-2">🏅 لوحة الصدارة</h3>
         <span id="lb-status" class="text-[9px] text-[var(--muted)]"></span>
       </div>
       <div class="flex gap-2 mb-3">
-        <button id="lb-tab-today" type="button" class="tab-btn active text-xs px-3 py-1.5 rounded-lg border border-white/10">أوائل اليوم</button>
+        <button id="lb-tab-today" type="button" class="tab-btn active text-xs px-3 py-1.5 rounded-lg border border-white/10">الجولة الحالية</button>
         <button id="lb-tab-all" type="button" class="tab-btn text-xs px-3 py-1.5 rounded-lg border border-white/10">كل الأوقات</button>
       </div>
       <div id="leaderboard-list" class="space-y-2 max-h-72 overflow-y-auto pl-1"></div>
       <p id="leaderboard-empty" class="text-center text-[var(--muted)] text-xs py-3">لا توجد نتائج مسجّلة بعد. كن أول من يبدأ التحدي!</p>
     </div>
 
-    <!-- Name entry / start card -->
     <div id="entry-card" class="card rounded-3xl p-6 md:p-8 shadow-2xl">
       <label class="block text-sm mb-2 text-[var(--muted)]">الاسم الثلاثي كاملاً</label>
       <input id="student-name" type="text" placeholder="مثال: أحمد محمد علي"
@@ -120,21 +112,26 @@
         <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">12</span>رياضة</div>
         <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">12</span>English</div>
       </div>
-      <p class="text-center text-[10px] text-[var(--rose)] mb-4">تضم كل مادة سؤالين فائقي الصعوبة (10 إجمالاً) لفرز الأوائل 🔥</p>
+      <p class="text-center text-[10px] text-[var(--rose)] mb-4">10 أسئلة فائقة الصعوبة تختبر التفكير المنطقي العميق 🔥</p>
 
       <button id="start-btn" type="button" class="btn-gold w-full rounded-xl py-3.5 font-display font-bold text-lg">
-        ابدأ امتحان اليوم 🚀
+        ابدأ التحدي الآن 🚀
       </button>
       <button id="history-btn" type="button" class="btn-ghost w-full rounded-xl py-2.5 mt-3 text-sm">📜 سجل درجاتي السابقة</button>
-      <p class="text-center text-[10px] text-[var(--muted)] mt-3">امتحان واحد فقط مسموح لكل طالب في اليوم — يتجدد الامتحان تلقائياً كل يوم.</p>
+      <p class="text-center text-[10px] text-[var(--muted)] mt-3">محاولة واحدة فقط لكل جهاز في كل جولة (10 ساعات).</p>
     </div>
 
-    <!-- Locked (already attempted today) card -->
     <div id="locked-card" class="hidden card rounded-3xl p-8 shadow-2xl text-center border-2 border-[var(--gold)]">
       <div class="text-5xl mb-3">✋</div>
-      <h3 class="font-display text-xl font-bold text-[var(--gold)] mb-2">لقد أديت امتحان اليوم بالفعل!</h3>
+      <h3 class="font-display text-xl font-bold text-[var(--gold)] mb-2">انتهت محاولتك لهذه الجولة!</h3>
       <p class="text-sm text-[var(--muted)] mb-4" id="locked-message"></p>
       <button id="locked-back-btn" type="button" class="btn-ghost w-full rounded-xl py-2.5 text-sm">رجوع</button>
+    </div>
+
+    <div id="banned-card" class="hidden card rounded-3xl p-8 shadow-2xl text-center border-2 border-[var(--rose)]">
+      <div class="text-5xl mb-3">🚫</div>
+      <h3 class="font-display text-xl font-bold text-[var(--rose)] mb-2">تم حظر هذا الجهاز</h3>
+      <p class="text-sm text-[var(--muted)]">تم منع هذا الجهاز نهائياً من دخول المسابقة بسبب مخالفة قواعد الاستخدام (اسم غير لائق).</p>
     </div>
   </section>
 
@@ -148,7 +145,6 @@
       <div id="progress-fill" class="progress-fill h-full" style="width:2%"></div>
     </div>
     <p class="text-[11px] text-[var(--muted)] mb-5">السؤال <span id="q-index">1</span> من 60</p>
-
     <div class="card rounded-3xl p-6 md:p-8 shadow-2xl">
       <div class="flex items-start justify-between gap-3 mb-4">
         <h2 id="question-text" class="font-display text-xl md:text-2xl font-semibold leading-relaxed"></h2>
@@ -156,10 +152,7 @@
       </div>
       <div id="options-container" class="grid grid-cols-1 gap-3"></div>
     </div>
-
-    <button id="next-btn" type="button" disabled class="btn-gold w-full rounded-xl py-3.5 font-display font-bold text-lg mt-5">
-      التالي ←
-    </button>
+    <button id="next-btn" type="button" disabled class="btn-gold w-full rounded-xl py-3.5 font-display font-bold text-lg mt-5">التالي ←</button>
   </section>
 
   <!-- ===================== RESULT SCREEN ===================== -->
@@ -168,15 +161,29 @@
       <div id="result-emoji" class="text-6xl mb-3">🎉</div>
       <h2 class="font-display text-2xl font-bold mb-1">أحسنت يا <span id="result-name" class="text-[var(--gold)]"></span>!</h2>
       <p class="text-[var(--muted)] text-sm mb-6" id="result-sub"></p>
-
       <div class="hexagon w-40 h-40 mx-auto card flex flex-col items-center justify-center mb-6">
         <span class="font-display text-4xl font-bold text-[var(--gold)]" id="result-score">0</span>
         <span class="text-xs text-[var(--muted)]">من 60</span>
       </div>
       <p class="text-xs text-[var(--muted)] mb-4">⏱️ وقت الحل: <span id="result-duration" class="text-[var(--gold)]"></span></p>
       <div id="result-breakdown" class="grid grid-cols-5 gap-2 text-[11px] mb-6"></div>
-
       <button id="restart-btn" type="button" class="btn-gold w-full rounded-xl py-3.5 font-display font-bold">رجوع للصفحة الرئيسية</button>
+    </div>
+  </section>
+
+  <!-- ===================== PUNISHMENT SCREEN ===================== -->
+  <section id="screen-punish" class="screen w-full max-w-xl">
+    <div class="card rounded-3xl p-6 md:p-8 shadow-2xl border-2 border-[var(--rose)]">
+      <div class="text-center mb-4">
+        <div class="text-5xl mb-2">⛔</div>
+        <h2 class="font-display text-xl font-bold text-[var(--rose)]">تم رصد اسم غير لائق!</h2>
+        <p class="text-xs text-[var(--muted)] mt-2">تم تحويلك تلقائياً لوضع العقاب — كل إجاباتك هنا تُحتسب خطأ إجبارياً، وسيتم حظر جهازك نهائياً بعد الانتهاء.</p>
+      </div>
+      <p class="text-[11px] text-[var(--muted)] mb-3 text-center">سؤال <span id="punish-index">1</span> من <span id="punish-total">5</span></p>
+      <div class="bg-black/30 rounded-2xl p-6 mb-4">
+        <h3 id="punish-question" class="font-display text-lg font-semibold mb-4"></h3>
+        <div id="punish-options" class="grid grid-cols-1 gap-3"></div>
+      </div>
     </div>
   </section>
 
@@ -199,27 +206,27 @@
       <h2 class="font-display text-2xl font-bold text-[var(--gold)]">لوحة تحكم المشرف</h2>
       <button id="admin-refresh" type="button" class="text-xs bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">تحديث ⟳</button>
     </div>
-    <div class="card rounded-2xl overflow-hidden">
+    <div class="card rounded-2xl overflow-hidden mb-6">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-black/30 text-[var(--muted)] text-xs">
-            <tr>
-              <th class="p-3 text-right">#</th>
-              <th class="p-3 text-right">الاسم</th>
-              <th class="p-3 text-right">الدرجة</th>
-              <th class="p-3 text-right">النسبة</th>
-              <th class="p-3 text-right">التاريخ</th>
-              <th class="p-3 text-right">وقت الحل</th>
-              <th class="p-3 text-right">الحالة</th>
-            </tr>
+            <tr><th class="p-3 text-right">#</th><th class="p-3 text-right">الاسم</th><th class="p-3 text-right">الدرجة</th><th class="p-3 text-right">النسبة</th><th class="p-3 text-right">الجولة</th><th class="p-3 text-right">وقت الحل</th><th class="p-3 text-right">الحالة</th></tr>
           </thead>
           <tbody id="admin-table-body"></tbody>
         </table>
       </div>
     </div>
-    <p id="admin-empty" class="text-center text-[var(--muted)] text-sm mt-6 hidden">لا توجد محاولات مسجّلة بعد.</p>
+    <p id="admin-empty" class="text-center text-[var(--muted)] text-sm mb-6 hidden">لا توجد محاولات مسجّلة بعد.</p>
+    <h3 class="font-display text-lg font-bold text-[var(--rose)] mb-3">🚫 الأجهزة المحظورة</h3>
+    <div class="card rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-black/30 text-[var(--muted)] text-xs"><tr><th class="p-3 text-right">#</th><th class="p-3 text-right">الاسم المستخدم</th><th class="p-3 text-right">وقت الحظر</th></tr></thead>
+          <tbody id="banned-table-body"></tbody>
+        </table>
+      </div>
+    </div>
   </section>
-
 </div>
 
 <!-- ===================== CHEAT WARNING OVERLAY ===================== -->
@@ -234,107 +241,136 @@
 
 <script>
 /* ==================================================================
-   0) إعداد jsonbin.io — قاعدة بيانات صغيرة جداً (صندوق JSON واحد بس).
-   استبدل القيمتين دول ببيانات حسابك.
+   0) إعداد jsonbin.io
    ================================================================== */
 const JSONBIN_API_URL  = "https://api.jsonbin.io/v3/b";
 const JSONBIN_BIN_ID   = "6a8a0c92f5f4af5e29367cef";
 const JSONBIN_API_KEY  = "$2a$10$H8YgvYa.7XiLYSdd3W7XaOU.C5adwWP6aZJrZ5oHlEps5rx.P4Ei.";
-
-/* غيّر هذا الكود السري قبل النشر */
 const ADMIN_SECRET = "1234";
 
 const QUESTIONS_PER_SUBJECT_NORMAL = 10;
 const QUESTIONS_PER_SUBJECT_HARD   = 2;
 const TOTAL_QUESTIONS = 60;
 const EXAM_SECONDS = 30*60;
+const PERIOD_MS = 10*60*60*1000; /* 10 ساعات بالمللي — جوهر النظام */
 
-function todayStr(){
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
+function currentPeriodId(){ return Math.floor(Date.now() / PERIOD_MS); }
+function periodEndTime(periodId){ return (periodId+1) * PERIOD_MS; }
 function normalizeName(n){ return n.trim().replace(/\s+/g,' ').toLowerCase(); }
 
-/* ---------- طبقة اتصال jsonbin.io (صندوق JSON واحد فيه كل المحاولات) ---------- */
-function jsonbinConfigured(){
-  return !JSONBIN_BIN_ID.startsWith('REPLACE_') && !JSONBIN_API_KEY.startsWith('REPLACE_');
-}
-async function jsonbinGetAttempts(){
-  if(!jsonbinConfigured()) return [];
+/* ==================================================================
+   1) طبقة اتصال jsonbin.io — {attempts:[...], banned:[...]}
+   ================================================================== */
+function jsonbinConfigured(){ return !JSONBIN_BIN_ID.startsWith('REPLACE_') && !JSONBIN_API_KEY.startsWith('REPLACE_'); }
+async function jsonbinGetData(){
+  if(!jsonbinConfigured()) return { attempts: [], banned: [] };
   try{
-    const res = await fetch(`${JSONBIN_API_URL}/${JSONBIN_BIN_ID}/latest`, {
-      headers: { 'X-Master-Key': JSONBIN_API_KEY, 'X-Bin-Meta': 'false' }
-    });
+    const res = await fetch(`${JSONBIN_API_URL}/${JSONBIN_BIN_ID}/latest`, { headers:{ 'X-Master-Key': JSONBIN_API_KEY, 'X-Bin-Meta':'false' } });
     if(!res.ok) throw new Error('jsonbin get failed: '+res.status);
     const data = await res.json();
-    return Array.isArray(data.attempts) ? data.attempts : [];
-  }catch(e){ console.warn('تعذر الاتصال بـ jsonbin', e); return []; }
+    return { attempts: Array.isArray(data.attempts)?data.attempts:[], banned: Array.isArray(data.banned)?data.banned:[] };
+  }catch(e){ console.warn('تعذر الاتصال بقاعدة البيانات', e); return { attempts: [], banned: [] }; }
 }
-async function jsonbinSaveAttempts(attempts){
+async function jsonbinSaveData(fullData){
   if(!jsonbinConfigured()) return false;
   try{
     const res = await fetch(`${JSONBIN_API_URL}/${JSONBIN_BIN_ID}`, {
-      method:'PUT',
-      headers: { 'Content-Type':'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-      body: JSON.stringify({ attempts })
+      method:'PUT', headers:{ 'Content-Type':'application/json', 'X-Master-Key': JSONBIN_API_KEY }, body: JSON.stringify(fullData)
     });
     return res.ok;
-  }catch(e){ console.warn('فشل حفظ البيانات في jsonbin', e); return false; }
+  }catch(e){ console.warn('فشل حفظ البيانات', e); return false; }
 }
 async function addAttemptRemote(newAttempt){
-  const current = await jsonbinGetAttempts();
-  current.push(newAttempt);
-  await jsonbinSaveAttempts(current);
+  const data = await jsonbinGetData();
+  data.attempts.push(newAttempt);
+  await jsonbinSaveData(data);
+}
+async function addBannedRemote(entry){
+  const data = await jsonbinGetData();
+  if(!data.banned.some(b=>b.Fingerprint===entry.Fingerprint)) data.banned.push(entry);
+  await jsonbinSaveData(data);
 }
 
-/* ---------- تخزين محلي احتياطي (localStorage) لمنع التكرار بسرعة ---------- */
-const LOCAL_LOG_KEY = 'quiz_attempts_log_v3';
+/* ---------- تخزين محلي احتياطي سريع ---------- */
+const LOCAL_LOG_KEY = 'quiz_attempts_log_v4';
 function localGetLog(){ try{ return JSON.parse(localStorage.getItem(LOCAL_LOG_KEY)||'[]'); }catch(e){ return []; } }
 function localAddLog(entry){ const log = localGetLog(); log.push(entry); localStorage.setItem(LOCAL_LOG_KEY, JSON.stringify(log)); }
-function localFindTodayAttempt(name, date){
-  const key = normalizeName(name);
-  return localGetLog().find(a => normalizeName(a.name) === key && a.date === date) || null;
+function localFindPeriodAttempt(fp, period){ return localGetLog().find(a => a.fp===fp && a.period===period) || null; }
+
+/* ==================================================================
+   2) بصمة الجهاز (Device Fingerprint) — رادع قوي وليس قفلاً مطلقاً
+      (لا يوجد نظام fingerprint في متصفح عادي يمنع 100% وضع التصفح الخفي،
+      وهذا حد تقني معروف وليس تقصيراً في التنفيذ)
+   ================================================================== */
+function simpleHash(str){
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for(let i=0;i<str.length;i++){
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+  return (4294967296*(2097151 & h2)+(h1>>>0)).toString(36);
 }
-async function findExistingTodayAttempt(name, date){
-  const local = localFindTodayAttempt(name, date);
-  if(local) return local;
-  const key = normalizeName(name);
-  const rows = await jsonbinGetAttempts();
-  const match = rows.find(r => normalizeName(r.Name||'') === key && r.Date === date);
-  if(match) return { name: match.Name, date: match.Date, score: match.Score, total: match.Total };
-  return null;
+function computeFingerprint(){
+  const parts = [];
+  try{
+    parts.push(navigator.userAgent||'', navigator.language||'', screen.width+'x'+screen.height+'x'+screen.colorDepth,
+      (Intl.DateTimeFormat().resolvedOptions().timeZone)||'', navigator.hardwareConcurrency||'', navigator.platform||'');
+    try{
+      const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+      ctx.textBaseline='top'; ctx.font="14px 'Arial'"; ctx.fillText('quiz-fp-2026',2,2);
+      parts.push(c.toDataURL());
+    }catch(e){}
+    try{
+      const gl = document.createElement('canvas').getContext('webgl');
+      const dbg = gl && gl.getExtension('WEBGL_debug_renderer_info');
+      if(dbg) parts.push(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL));
+    }catch(e){}
+  }catch(e){}
+  return 'fp_' + simpleHash(parts.join('###'));
+}
+function getDeviceFingerprint(){
+  let fp = localStorage.getItem('quiz_device_fp');
+  if(!fp){ fp = computeFingerprint(); localStorage.setItem('quiz_device_fp', fp); }
+  return fp;
 }
 
 /* ==================================================================
-   1) مولّد عشوائي ثابت لكل يوم (Seeded PRNG)
+   3) فلتر الأسماء المسيئة (مطابقة بعد تطبيع النص: إزالة التشكيل والمسافات
+      والتكرار وبعض بدائل الحروف الشائعة)
+   ================================================================== */
+const BAD_WORDS = [
+  "كسمك","كسمين","منيك","عرص","متناك","خول","شرموط","شرموطة","قحبة","زانية",
+  "ابن الكلب","ابن كلب","حيوان وسخ","نيك","نيكها","واطي","حقير جدا",
+  "fuck","shit","bitch","asshole","nigger","cunt","dick","whore","slut","bastard"
+];
+function normalizeArabicText(s){
+  return s.toLowerCase()
+    .replace(/[\u064B-\u0652]/g,'')
+    .replace(/[إأآا]/g,'ا')
+    .replace(/ى/g,'ي').replace(/ة/g,'ه')
+    .replace(/\s+/g,'')
+    .replace(/(.)\1{2,}/g,'$1$1');
+}
+function containsBadWord(name){
+  const norm = normalizeArabicText(name);
+  return BAD_WORDS.some(w => norm.includes(normalizeArabicText(w)));
+}
+
+/* ==================================================================
+   4) مولّد عشوائي ثابت لكل جولة (10 ساعات) — Seeded PRNG
    ================================================================== */
 function seededRandom(seedStr){
   let h = 1779033703 ^ seedStr.length;
-  for(let i=0;i<seedStr.length;i++){
-    h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353);
-    h = (h << 13) | (h >>> 19);
-  }
-  return function(){
-    h = Math.imul(h ^ (h >>> 16), 2246822507);
-    h = Math.imul(h ^ (h >>> 13), 3266489909);
-    h ^= h >>> 16;
-    return (h >>> 0) / 4294967296;
-  };
+  for(let i=0;i<seedStr.length;i++){ h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353); h=(h<<13)|(h>>>19); }
+  return function(){ h=Math.imul(h^(h>>>16),2246822507); h=Math.imul(h^(h>>>13),3266489909); h^=h>>>16; return (h>>>0)/4294967296; };
 }
-function seededShuffle(arr, rng){
-  const a = [...arr];
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(rng()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
-  return a;
-}
+function seededShuffle(arr, rng){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
 /* ==================================================================
-   2) بنك الأسئلة (كل مادة: 15 سؤال عادي + 2 سؤال فائق الصعوبة)
+   5) بنك الأسئلة (كل مادة: 15 عادي + 2 فائق الصعوبة/تفكير منطقي)
    ================================================================== */
 const QUESTION_BANK = {
   arabic: { label:"لغة عربية", items:[
@@ -353,7 +389,7 @@ const QUESTION_BANK = {
     { level:'normal', q:"«يا طالبَ العلمِ اجتهدْ» أسلوب:", options:["نداء","تعجب","قسم","شرط"], correct:0 },
     { level:'normal', q:"علامة نصب جمع المؤنث السالم:", options:["الكسرة","الفتحة","الياء","الألف"], correct:0 },
     { level:'normal', q:"في جملة «نجح الطالبُ المجتهدُ» الفاعل هو:", options:["الطالبُ","المجتهدُ","نجح","لا يوجد فاعل"], correct:0 },
-    { level:'hard', q:"أيّ الجمل التالية اشتملت على أسلوب قصر؟", options:["إنما العلمُ نورٌ","العلمُ نورٌ","ما أجمل العلم!","اجتهدْ في طلب العلم"], correct:0 },
+    { level:'hard', q:"إذا كانت كل الجمل الاسمية تبدأ باسم، وهذه الجملة «العلمُ نورٌ» تبدأ باسم، فهل يلزم منطقياً أنها جملة اسمية؟", options:["نعم يلزم ذلك منطقياً وهو صحيح هنا فعلاً","لا يلزم أبداً","لا علاقة بين المقدمتين","يستحيل تحديد ذلك"], correct:0 },
     { level:'hard', q:"أيّ الأسماء التالية ممنوع من الصرف؟", options:["أحمدُ","محمدٌ","رجلٌ","كتابٌ"], correct:0 }
   ]},
   science: { label:"علوم", items:[
@@ -372,7 +408,7 @@ const QUESTION_BANK = {
     { level:'normal', q:"الأوعية التي تحمل الدم من القلب إلى أعضاء الجسم:", options:["الشرايين","الأوردة","الشعيرات الدموية فقط","لا شيء مما سبق"], correct:0 },
     { level:'normal', q:"من مصادر الطاقة المتجددة:", options:["الطاقة الشمسية","الفحم","البترول","الغاز الطبيعي"], correct:0 },
     { level:'normal', q:"انتقال الحرارة عبر الفراغ يسمى:", options:["الإشعاع","التوصيل","الحمل","الانصهار"], correct:0 },
-    { level:'hard', q:"ما الناتج النهائي لاحتراق غاز الميثان (CH4) احتراقاً كاملاً في الأكسجين؟", options:["ثاني أكسيد الكربون وماء","أول أكسيد الكربون وهيدروجين","كربون نقي وأكسجين","ميثانول"], correct:0 },
+    { level:'hard', q:"لو زادت كتلة جسم إلى الضعف مع ثبات القوة المؤثرة عليه، فماذا يحدث لتسارعه وفق قانون نيوتن الثاني؟", options:["يقل إلى النصف","يتضاعف","يظل ثابتاً","يصبح صفراً"], correct:0 },
     { level:'hard', q:"ما نوع الرابطة الكيميائية بين ذرات الصوديوم والكلور في ملح الطعام؟", options:["رابطة أيونية","رابطة تساهمية","رابطة فلزية","رابطة هيدروجينية"], correct:0 }
   ]},
   social: { label:"دراسات", items:[
@@ -391,7 +427,7 @@ const QUESTION_BANK = {
     { level:'normal', q:"المناخ السائد في معظم أراضي مصر هو مناخ:", options:["صحراوي جاف","استوائي ممطر","قطبي بارد","معتدل ماطر"], correct:0 },
     { level:'normal', q:"شبه جزيرة سيناء تقع في قارة:", options:["آسيا","أفريقيا","أوروبا","أستراليا"], correct:0 },
     { level:'normal', q:"من أهم الممرات الملاحية الدولية التي تملكها مصر:", options:["قناة السويس","مضيق جبل طارق","قناة بنما","مضيق ماجلان"], correct:0 },
-    { level:'hard', q:"ما أهم نتيجة اقتصادية مباشرة لتوسعة قناة السويس الجديدة عام 2015؟", options:["زيادة الإيرادات وتقليل زمن العبور","إغلاق الملاحة مؤقتاً","تحويل مسار النيل","لا شيء مما سبق"], correct:0 },
+    { level:'hard', q:"لو زادت إيرادات قناة السويس بسبب توسعتها، فأي أثر اقتصادي مباشر يترتب على ذلك منطقياً؟", options:["زيادة موارد الدولة من العملة الصعبة","نقص عدد السفن العابرة","إغلاق الملاحة الدولية","تراجع الاستثمار الأجنبي"], correct:0 },
     { level:'hard', q:"في أي عصر تم بناء الأهرامات الثلاثة الكبرى بالجيزة؟", options:["الدولة القديمة","الدولة الوسطى","الدولة الحديثة","العصر البطلمي"], correct:0 }
   ]},
   math: { label:"رياضيات", items:[
@@ -410,8 +446,8 @@ const QUESTION_BANK = {
     { level:'normal', q:"حجم مكعب طول ضلعه 3 سم يساوي:", options:["27 سم³","9 سم³","18 سم³","6 سم³"], correct:0 },
     { level:'normal', q:"الزاوية التي قياسها بين 90° و180° تُسمى:", options:["منفرجة","حادة","قائمة","مستقيمة"], correct:0 },
     { level:'normal', q:"ناتج (−3) × (−4) يساوي:", options:["12","−12","7","−7"], correct:0 },
-    { level:'hard', q:"إذا كان س² − 5س + 6 = 0، فإن قيمتي س هما:", options:["2 , 3","1 , 6","−2 , −3","5 , 6"], correct:0 },
-    { level:'hard', q:"ما ناتج 2س³ عند س = −2؟", options:["−16","16","−8","8"], correct:0 }
+    { level:'hard', q:"ما الرقم التالي في المتتالية المنطقية: 2, 6, 12, 20, 30, ؟", options:["42","40","36","45"], correct:0 },
+    { level:'hard', q:"إذا كان س² − 5س + 6 = 0، فإن قيمتي س هما:", options:["2 , 3","1 , 6","−2 , −3","5 , 6"], correct:0 }
   ]},
   english: { label:"English", items:[
     { level:'normal', q:"Choose the correct verb: \"She ___ to school every day.\"", options:["goes","go","going","gone"], correct:0 },
@@ -429,16 +465,22 @@ const QUESTION_BANK = {
     { level:'normal', q:"\"If I ___ rich, I would travel the world.\"", options:["were","was","am","be"], correct:0 },
     { level:'normal', q:"Which of the following is a noun?", options:["happiness","quickly","beautiful","run"], correct:0 },
     { level:'normal', q:"Choose the correct spelling:", options:["necessary","neccessary","necesary","neccesary"], correct:0 },
-    { level:'hard', q:"Choose the correct reported speech: He said that he ___ the homework the day before.", options:["had finished","finishes","will finish","finish"], correct:0 },
+    { level:'hard', q:"If all A's are B's, and all B's are C's, which must be true?", options:["All A's are C's","No A's are C's","Some C's are not B's","Cannot be determined"], correct:0 },
     { level:'hard', q:"Which sentence uses the third conditional correctly?", options:["If I had studied, I would have passed.","If I study, I would have passed.","If I had studied, I will pass.","If I studied, I would have pass."], correct:0 }
   ]}
 };
 
-/* ==================================================================
-   3) بناء امتحان اليوم: 10 عادي + 2 صعب من كل مادة = 60 سؤالاً
-   ================================================================== */
-function buildDailyQuiz(dateStr){
-  const rng = seededRandom('quiz-' + dateStr);
+/* أسئلة وضع العقاب (منطق عام، ثابتة، لا تُحتسب أبداً بشكل صحيح) */
+const PUNISH_QUESTIONS = [
+  { q:"إذا كانت كل الوردات زهوراً، وبعض الزهور حمراء، فهل كل الورود حمراء بالضرورة؟", options:["لا، غير لازم منطقياً","نعم لازم","لا علاقة","مستحيل تحديدها"] },
+  { q:"ما الرقم التالي: 1, 1, 2, 3, 5, 8, ؟", options:["13","12","11","15"] },
+  { q:"لو أن كل الأشجار خضراء، وهذا الشيء أخضر، فهل هو بالضرورة شجرة؟", options:["لا، ليس بالضرورة","نعم بالتأكيد","نعم أحياناً فقط","لا معنى للسؤال"] },
+  { q:"أي الأرقام لا ينتمي للنمط: 2, 4, 8, 16, 30, 32؟", options:["30","4","16","32"] },
+  { q:"إذا استغرق 5 عمال 5 أيام لإنجاز 5 وحدات عمل، كم يستغرق 100 عامل لإنجاز 100 وحدة؟", options:["5 أيام","100 يوم","20 يوماً","50 يوماً"] }
+];
+
+function buildDailyQuiz(periodId){
+  const rng = seededRandom('quiz-round-' + periodId);
   let quiz = [];
   for(const key of Object.keys(QUESTION_BANK)){
     const subject = QUESTION_BANK[key];
@@ -449,75 +491,93 @@ function buildDailyQuiz(dateStr){
     [...pickedNormal, ...pickedHard].forEach(item=>{
       const correctText = item.options[item.correct];
       const shuffledOptions = seededShuffle(item.options, rng);
-      quiz.push({
-        subjectKey: key, subjectLabel: subject.label, level: item.level,
-        question: item.q, options: shuffledOptions,
-        correctIndex: shuffledOptions.indexOf(correctText)
-      });
+      quiz.push({ subjectKey:key, subjectLabel:subject.label, level:item.level, question:item.q, options:shuffledOptions, correctIndex: shuffledOptions.indexOf(correctText) });
     });
   }
   return seededShuffle(quiz, rng);
 }
 
 /* ==================================================================
-   4) حالة التطبيق والتنقل بين الشاشات
+   6) حالة التطبيق والتنقل بين الشاشات
    ================================================================== */
 const screens = {
   welcome: document.getElementById('screen-welcome'), quiz: document.getElementById('screen-quiz'),
   result: document.getElementById('screen-result'), history: document.getElementById('screen-history'),
-  admin: document.getElementById('screen-admin')
+  admin: document.getElementById('screen-admin'), punish: document.getElementById('screen-punish')
 };
 function showScreen(name){ Object.values(screens).forEach(s=>s.classList.remove('active')); screens[name].classList.add('active'); }
 
 let state = {
-  name: "", quiz: [], currentIndex: 0, selectedOptionIndex: null,
-  score: 0, subjectScores: {}, timerInterval: null, timeLeft: EXAM_SECONDS,
-  tabSwitchCount: 0, flagged: false, finished: false, startedAt: 0
+  name:"", quiz:[], currentIndex:0, selectedOptionIndex:null, score:0, subjectScores:{},
+  timerInterval:null, timeLeft:EXAM_SECONDS, tabSwitchCount:0, flagged:false, finished:false, startedAt:0, fp:''
 };
 
+/* عداد الجولة القادمة */
+function startCountdown(){
+  const el = document.getElementById('countdown-timer');
+  function tick(){
+    const remain = periodEndTime(currentPeriodId()) - Date.now();
+    if(remain <= 0){ location.reload(); return; }
+    const h = Math.floor(remain/3600000), m = Math.floor((remain%3600000)/60000), s = Math.floor((remain%60000)/1000);
+    el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  tick(); setInterval(tick, 1000);
+}
+
 /* ==================================================================
-   5) شاشة الترحيب: القفل اليومي + التحقق من الاسم + لوحة الصدارة
+   7) شاشة الترحيب: القفل بالبصمة + الحظر + فلتر الأسماء + لوحة الصدارة
    ================================================================== */
 const nameInput = document.getElementById('student-name');
 const nameError = document.getElementById('name-error');
 const startBtn = document.getElementById('start-btn');
 const entryCard = document.getElementById('entry-card');
 const lockedCard = document.getElementById('locked-card');
+const bannedCard = document.getElementById('banned-card');
 
 function isFullName(v){ return v.trim().split(/\s+/).filter(Boolean).length >= 3; }
 
 startBtn.addEventListener('click', async ()=>{
   const val = nameInput.value.trim();
-  if(!isFullName(val)){
-    nameError.classList.remove('hidden');
-    nameInput.classList.add('border-[var(--rose)]');
-    return;
+  if(!isFullName(val)){ nameError.classList.remove('hidden'); nameInput.classList.add('border-[var(--rose)]'); return; }
+  nameError.classList.add('hidden'); nameInput.classList.remove('border-[var(--rose)]');
+
+  const fp = getDeviceFingerprint();
+  state.fp = fp;
+
+  startBtn.disabled = true; startBtn.textContent = 'جارِ التحقق...';
+  const data = await jsonbinGetData();
+  startBtn.disabled = false; startBtn.textContent = 'ابدأ التحدي الآن 🚀';
+
+  /* 1) هل الجهاز محظور نهائياً؟ */
+  if(data.banned.some(b=>b.Fingerprint===fp)){ showBanned(); return; }
+
+  /* 2) هل الاسم فيه لفظ مسيء؟ -> وضع العقاب */
+  if(containsBadWord(val)){ startPunishMode(val, fp); return; }
+
+  /* 3) هل سبق واستخدم هذا الجهاز محاولته في هذه الجولة؟ */
+  const period = currentPeriodId();
+  const localMatch = localFindPeriodAttempt(fp, period);
+  const remoteMatch = data.attempts.find(a => a.Fingerprint===fp && a.Period===period);
+  if(localMatch || remoteMatch){
+    const m = localMatch || { name: remoteMatch.Name, score: remoteMatch.Score, total: remoteMatch.Total };
+    showLocked(m); return;
   }
-  nameError.classList.add('hidden');
-  nameInput.classList.remove('border-[var(--rose)]');
-  startBtn.disabled = true;
-  startBtn.textContent = 'جارِ التحقق...';
 
-  const date = todayStr();
-  const existing = await findExistingTodayAttempt(val, date);
-  startBtn.disabled = false;
-  startBtn.textContent = 'ابدأ امتحان اليوم 🚀';
-
-  if(existing){ showLocked(existing); return; }
   state.name = val.replace(/\s+/g,' ');
   startQuiz();
 });
 
 function showLocked(attempt){
-  entryCard.classList.add('hidden');
-  lockedCard.classList.remove('hidden');
+  entryCard.classList.add('hidden'); lockedCard.classList.remove('hidden');
+  const remain = periodEndTime(currentPeriodId()) - Date.now();
+  const h = Math.floor(remain/3600000), m = Math.floor((remain%3600000)/60000);
   document.getElementById('locked-message').textContent =
-    `لقد أديت امتحان اليوم بالفعل يا ${attempt.name}، ودرجتك هي (${attempt.score} من ${attempt.total||TOTAL_QUESTIONS})! عد غداً لمنافسة جديدة.`;
+    `لقد استخدمت محاولتك لهذه الجولة بالفعل يا ${attempt.name}، ودرجتك كانت (${attempt.score} من ${attempt.total||TOTAL_QUESTIONS})! الجولة القادمة تبدأ بعد ${h} ساعة و${m} دقيقة.`;
 }
-document.getElementById('locked-back-btn').addEventListener('click', ()=>{
-  lockedCard.classList.add('hidden'); entryCard.classList.remove('hidden'); nameInput.value = '';
-});
+function showBanned(){ entryCard.classList.add('hidden'); bannedCard.classList.remove('hidden'); }
+document.getElementById('locked-back-btn').addEventListener('click', ()=>{ lockedCard.classList.add('hidden'); entryCard.classList.remove('hidden'); nameInput.value=''; });
 
+/* لوحة الصدارة */
 let lbMode = 'today';
 document.getElementById('lb-tab-today').addEventListener('click', ()=>{ lbMode='today'; setLbTabs(); loadLeaderboard(); });
 document.getElementById('lb-tab-all').addEventListener('click', ()=>{ lbMode='all'; setLbTabs(); loadLeaderboard(); });
@@ -539,18 +599,16 @@ function renderLeaderboard(list){
     row.className = 'lb-row bg-white/5 rounded-lg px-3 py-2 text-sm';
     const medal = idx===0 ? '🥇' : idx===1 ? '🥈' : idx===2 ? '🥉' : `${idx+1}`;
     const flaggedTag = item.Flagged ? ' <span class="text-[var(--rose)] text-[10px]">(مُلغى)</span>' : '';
-    row.innerHTML = `
-      <span class="flex items-center gap-2"><span class="w-6 text-center">${medal}</span><span class="font-semibold">${item.Name}</span>${flaggedTag}</span>
+    row.innerHTML = `<span class="flex items-center gap-2"><span class="w-6 text-center">${medal}</span><span class="font-semibold">${item.Name}</span>${flaggedTag}</span>
       <span class="text-[var(--gold)] font-display text-xs">${item.Score}/${item.Total} • ⏱️${fmtDuration(item.DurationSeconds||0)}</span>`;
     container.appendChild(row);
   });
 }
-
 async function loadLeaderboard(){
   setLbStatus(jsonbinConfigured() ? '' : 'قاعدة البيانات غير مُعدة بعد');
-  const date = todayStr();
-  const all = await jsonbinGetAttempts();
-  let rows = lbMode==='today' ? all.filter(r=>r.Date===date) : all.slice();
+  const period = currentPeriodId();
+  const data = await jsonbinGetData();
+  let rows = lbMode==='today' ? data.attempts.filter(r=>r.Period===period) : data.attempts.slice();
   rows.sort((a,b)=> (b.Score - a.Score) || ((a.DurationSeconds||0) - (b.DurationSeconds||0)));
   renderLeaderboard(rows);
   const clean = rows.filter(r=>!r.Flagged);
@@ -558,13 +616,11 @@ async function loadLeaderboard(){
     document.getElementById('top-scorer-name').textContent = clean[0].Name;
     document.getElementById('top-scorer-score').textContent = `${clean[0].Score} / ${clean[0].Total} نقطة`;
     document.getElementById('top-scorer-banner').classList.remove('hidden');
-  } else {
-    document.getElementById('top-scorer-banner').classList.add('hidden');
-  }
+  } else { document.getElementById('top-scorer-banner').classList.add('hidden'); }
 }
 
 /* ==================================================================
-   6) منطق الاختبار
+   8) منطق الاختبار العادي
    ================================================================== */
 const questionText = document.getElementById('question-text');
 const optionsContainer = document.getElementById('options-container');
@@ -576,13 +632,11 @@ const hardBadge = document.getElementById('hard-badge');
 const timerEl = document.getElementById('quiz-timer');
 
 function startQuiz(){
-  state.quiz = buildDailyQuiz(todayStr());
-  state.currentIndex = 0; state.selectedOptionIndex = null; state.score = 0;
-  state.subjectScores = {}; state.tabSwitchCount = 0; state.flagged = false;
-  state.finished = false; state.timeLeft = EXAM_SECONDS; state.startedAt = Date.now();
+  state.quiz = buildDailyQuiz(currentPeriodId());
+  state.currentIndex=0; state.selectedOptionIndex=null; state.score=0; state.subjectScores={};
+  state.tabSwitchCount=0; state.flagged=false; state.finished=false; state.timeLeft=EXAM_SECONDS; state.startedAt=Date.now();
   showScreen('quiz'); renderQuestion(); startTimer();
 }
-
 function renderQuestion(){
   const item = state.quiz[state.currentIndex];
   questionText.textContent = item.question;
@@ -590,64 +644,44 @@ function renderQuestion(){
   hardBadge.classList.toggle('hidden', item.level !== 'hard');
   qIndexEl.textContent = state.currentIndex+1;
   progressFill.style.width = `${((state.currentIndex)/TOTAL_QUESTIONS)*100 + 2}%`;
-
   optionsContainer.innerHTML = '';
   item.options.forEach((opt, idx)=>{
     const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'option-btn text-right rounded-xl px-4 py-3.5 bg-white/5';
-    btn.textContent = opt;
+    btn.type='button'; btn.className='option-btn text-right rounded-xl px-4 py-3.5 bg-white/5'; btn.textContent = opt;
     btn.addEventListener('click', ()=> selectOption(idx));
     optionsContainer.appendChild(btn);
   });
-  state.selectedOptionIndex = null;
-  nextBtn.disabled = true;
+  state.selectedOptionIndex = null; nextBtn.disabled = true;
 }
-
 function selectOption(idx){
   if(state.selectedOptionIndex !== null) return;
   state.selectedOptionIndex = idx;
   const item = state.quiz[state.currentIndex];
   [...optionsContainer.children].forEach((b,i)=>{
     b.classList.remove('option-correct','option-wrong');
-    if(i === item.correctIndex) b.classList.add('option-correct');
-    else if(i === idx) b.classList.add('option-wrong');
+    if(i === item.correctIndex) b.classList.add('option-correct'); else if(i === idx) b.classList.add('option-wrong');
   });
-  if(idx === item.correctIndex){
-    state.score++;
-    state.subjectScores[item.subjectKey] = (state.subjectScores[item.subjectKey]||0)+1;
-  }
+  if(idx === item.correctIndex){ state.score++; state.subjectScores[item.subjectKey] = (state.subjectScores[item.subjectKey]||0)+1; }
   nextBtn.disabled = false;
 }
-
 nextBtn.addEventListener('click', ()=>{
-  if(state.currentIndex < state.quiz.length-1){ state.currentIndex++; renderQuestion(); }
-  else { finishQuiz(false); }
+  if(state.currentIndex < state.quiz.length-1){ state.currentIndex++; renderQuestion(); } else { finishQuiz(false); }
 });
-
 function startTimer(){
-  clearInterval(state.timerInterval);
-  updateTimerDisplay();
-  state.timerInterval = setInterval(()=>{
-    state.timeLeft--;
-    updateTimerDisplay();
-    if(state.timeLeft <= 0){ clearInterval(state.timerInterval); finishQuiz(false); }
-  },1000);
+  clearInterval(state.timerInterval); updateTimerDisplay();
+  state.timerInterval = setInterval(()=>{ state.timeLeft--; updateTimerDisplay(); if(state.timeLeft<=0){ clearInterval(state.timerInterval); finishQuiz(false); } },1000);
 }
 function updateTimerDisplay(){
-  const m = Math.floor(state.timeLeft/60).toString().padStart(2,'0');
-  const s = (state.timeLeft%60).toString().padStart(2,'0');
+  const m=Math.floor(state.timeLeft/60).toString().padStart(2,'0'), s=(state.timeLeft%60).toString().padStart(2,'0');
   timerEl.textContent = `${m}:${s}`;
-  if(state.timeLeft <= 60) timerEl.classList.add('text-[var(--rose)]');
+  if(state.timeLeft<=60) timerEl.classList.add('text-[var(--rose)]');
 }
-
 async function finishQuiz(wasFlagged){
   if(state.finished) return;
-  state.finished = true;
-  clearInterval(state.timerInterval);
+  state.finished = true; clearInterval(state.timerInterval);
   state.flagged = wasFlagged || state.flagged;
   const durationSeconds = Math.min(EXAM_SECONDS, Math.round((Date.now()-state.startedAt)/1000));
-  const date = todayStr();
+  const period = currentPeriodId();
 
   showScreen('result');
   document.getElementById('result-name').textContent = state.name;
@@ -655,168 +689,169 @@ async function finishQuiz(wasFlagged){
   document.getElementById('result-duration').textContent = fmtDuration(durationSeconds);
 
   const pct = Math.round((state.score/TOTAL_QUESTIONS)*100);
-  let msg = "أداء رائع، واصل التميز!", emoji = "🎉";
-  if(state.flagged){ msg = "تم إنهاء المحاولة تلقائياً بسبب مغادرة الصفحة أثناء الاختبار."; emoji = "🚫"; }
-  else if(pct >= 90){ msg = "أداء خرافي! أنت في طليعة المتنافسين 🔥"; emoji = "🏆"; }
-  else if(pct >= 70){ msg = "أداء قوي ومميز، استمر بهذا المستوى!"; emoji = "🎉"; }
-  else if(pct >= 50){ msg = "بداية جيدة، ذاكر أكثر وستتصدر المنافسة!"; emoji = "💪"; }
-  else { msg = "لا بأس، هذه فرصة للمراجعة والمحاولة مجدداً غداً!"; emoji = "📘"; }
+  let msg="أداء رائع، واصل التميز!", emoji="🎉";
+  if(state.flagged){ msg="تم إنهاء المحاولة تلقائياً بسبب مغادرة الصفحة أثناء الاختبار."; emoji="🚫"; }
+  else if(pct>=90){ msg="أداء خرافي! أنت في طليعة المتنافسين 🔥"; emoji="🏆"; }
+  else if(pct>=70){ msg="أداء قوي ومميز، استمر بهذا المستوى!"; emoji="🎉"; }
+  else if(pct>=50){ msg="بداية جيدة، ذاكر أكثر وستتصدر المنافسة!"; emoji="💪"; }
+  else { msg="لا بأس، هذه فرصة للمراجعة والمحاولة مجدداً في الجولة القادمة!"; emoji="📘"; }
   document.getElementById('result-sub').textContent = msg;
   document.getElementById('result-emoji').textContent = emoji;
 
   const breakdown = document.getElementById('result-breakdown');
   breakdown.innerHTML = '';
   Object.keys(QUESTION_BANK).forEach(key=>{
-    const div = document.createElement('div');
-    div.className = 'bg-white/5 rounded-lg py-2';
+    const div = document.createElement('div'); div.className='bg-white/5 rounded-lg py-2';
     div.innerHTML = `<div class="text-[var(--gold)] font-bold font-display">${state.subjectScores[key]||0}/12</div><div class="text-[var(--muted)]">${QUESTION_BANK[key].label}</div>`;
     breakdown.appendChild(div);
   });
 
   const attemptData = {
-    Name: state.name, Score: state.score, Total: TOTAL_QUESTIONS, Date: date,
+    Name: state.name, Score: state.score, Total: TOTAL_QUESTIONS, Period: period,
     DurationSeconds: durationSeconds, Flagged: state.flagged, TabSwitchCount: state.tabSwitchCount,
-    SubjectScores: state.subjectScores, Timestamp: new Date().toISOString()
+    SubjectScores: state.subjectScores, Timestamp: new Date().toISOString(), Fingerprint: state.fp
   };
   await addAttemptRemote(attemptData);
-  localAddLog({ name: state.name, date, score: state.score, total: TOTAL_QUESTIONS });
-
+  localAddLog({ name: state.name, fp: state.fp, period, score: state.score, total: TOTAL_QUESTIONS });
   loadLeaderboard();
 }
-
 document.getElementById('restart-btn').addEventListener('click', ()=>{
-  nameInput.value = '';
-  lockedCard.classList.add('hidden');
-  entryCard.classList.remove('hidden');
-  showScreen('welcome');
-  loadLeaderboard();
+  nameInput.value=''; lockedCard.classList.add('hidden'); entryCard.classList.remove('hidden'); showScreen('welcome'); loadLeaderboard();
 });
 
 /* ==================================================================
-   7) سجل درجات الطالب
+   9) وضع العقاب — أسئلة تعجيزية، كل الإجابات تُحتسب خطأ، ثم حظر دائم
    ================================================================== */
-document.getElementById('history-btn').addEventListener('click', ()=>{
-  showScreen('history');
-  document.getElementById('history-name-input').value = nameInput.value || '';
-});
-document.getElementById('history-back-btn').addEventListener('click', ()=> showScreen('welcome'));
+let punishIndex = 0;
+function startPunishMode(name, fp){
+  showScreen('punish'); punishIndex = 0;
+  document.getElementById('punish-total').textContent = PUNISH_QUESTIONS.length;
+  renderPunishQuestion();
+}
+function renderPunishQuestion(){
+  const item = PUNISH_QUESTIONS[punishIndex];
+  document.getElementById('punish-index').textContent = punishIndex+1;
+  document.getElementById('punish-question').textContent = item.q;
+  const container = document.getElementById('punish-options');
+  container.innerHTML = '';
+  item.options.forEach(opt=>{
+    const btn = document.createElement('button');
+    btn.type='button'; btn.className='option-btn text-right rounded-xl px-4 py-3.5 bg-white/5';
+    btn.textContent = opt;
+    btn.addEventListener('click', ()=>{
+      [...container.children].forEach(b=>b.classList.remove('option-wrong'));
+      btn.classList.add('option-wrong'); /* كل إجابة تُحتسب خطأ إجبارياً */
+      setTimeout(()=>{
+        punishIndex++;
+        if(punishIndex < PUNISH_QUESTIONS.length){ renderPunishQuestion(); }
+        else { finalizeBan(); }
+      }, 700);
+    });
+    container.appendChild(btn);
+  });
+}
+async function finalizeBan(){
+  const fp = getDeviceFingerprint();
+  await addBannedRemote({ Fingerprint: fp, Name: nameInput.value.trim(), Timestamp: new Date().toISOString() });
+  showScreen('welcome');
+  entryCard.classList.add('hidden');
+  showBanned();
+}
 
+/* ==================================================================
+   10) سجل درجات الطالب
+   ================================================================== */
+document.getElementById('history-btn').addEventListener('click', ()=>{ showScreen('history'); document.getElementById('history-name-input').value = nameInput.value || ''; });
+document.getElementById('history-back-btn').addEventListener('click', ()=> showScreen('welcome'));
 document.getElementById('history-search-btn').addEventListener('click', async ()=>{
   const name = document.getElementById('history-name-input').value.trim();
-  const list = document.getElementById('history-list');
-  const empty = document.getElementById('history-empty');
-  list.innerHTML = '';
-  if(!name){ return; }
+  const list = document.getElementById('history-list'); const empty = document.getElementById('history-empty');
+  list.innerHTML = ''; if(!name) return;
   const key = normalizeName(name);
-  const rows = await jsonbinGetAttempts();
-  const mine = rows.filter(r => normalizeName(r.Name||'') === key).sort((a,b)=> (b.Date||'').localeCompare(a.Date||''));
+  const data = await jsonbinGetData();
+  const mine = data.attempts.filter(r => normalizeName(r.Name||'') === key).sort((a,b)=> b.Period - a.Period);
   if(!mine.length){ empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
   mine.forEach(r=>{
-    const div = document.createElement('div');
-    div.className = 'lb-row bg-white/5 rounded-lg px-3 py-2 text-sm';
-    div.innerHTML = `<span>${r.Date}</span><span class="text-[var(--gold)] font-display">${r.Score}/${r.Total}</span>`;
+    const div = document.createElement('div'); div.className='lb-row bg-white/5 rounded-lg px-3 py-2 text-sm';
+    div.innerHTML = `<span>جولة #${r.Period}</span><span class="text-[var(--gold)] font-display">${r.Score}/${r.Total}</span>`;
     list.appendChild(div);
   });
 });
 
 /* ==================================================================
-   8) نظام مكافحة الغش
+   11) نظام مكافحة الغش
    ================================================================== */
 document.addEventListener('contextmenu', e=> e.preventDefault());
-document.addEventListener('selectstart', e=>{
-  if(e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
-  e.preventDefault();
-});
+document.addEventListener('selectstart', e=>{ if(e.target && (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')) return; e.preventDefault(); });
 document.addEventListener('copy', e=> e.preventDefault());
 document.addEventListener('cut', e=> e.preventDefault());
 window.print = function(){ return false; };
-
 document.addEventListener('keydown', (e)=>{
-  const blockedCombo =
-    (e.ctrlKey && ['p','s','c','u'].includes(e.key.toLowerCase())) ||
-    (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) ||
-    e.key === 'F12' || e.key === 'PrintScreen';
-  if(blockedCombo){
-    e.preventDefault();
-    if(e.key === 'PrintScreen'){
-      if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText('').catch(()=>{});
-      triggerCheatWarning('حاولت أخذ لقطة شاشة! تم رصد المحاولة.');
-    }
-  }
+  const blocked = (e.ctrlKey && ['p','s','c','u'].includes(e.key.toLowerCase())) || (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) || e.key==='F12' || e.key==='PrintScreen';
+  if(blocked){ e.preventDefault(); if(e.key==='PrintScreen'){ if(navigator.clipboard) navigator.clipboard.writeText('').catch(()=>{}); triggerCheatWarning('حاولت أخذ لقطة شاشة! تم رصد المحاولة.'); } }
 });
-
 let cheatOverlayShown = false;
 const cheatOverlay = document.getElementById('cheat-overlay');
 const cheatMessage = document.getElementById('cheat-message');
-document.getElementById('cheat-ack-btn').addEventListener('click', ()=>{
-  cheatOverlay.classList.remove('active'); cheatOverlayShown = false;
-});
+document.getElementById('cheat-ack-btn').addEventListener('click', ()=>{ cheatOverlay.classList.remove('active'); cheatOverlayShown=false; });
 function triggerCheatWarning(customMsg){
-  if(!screens.quiz.classList.contains('active')) return;
-  if(state.finished) return;
+  if(!screens.quiz.classList.contains('active')) return; if(state.finished) return;
   state.tabSwitchCount++;
-  if(state.tabSwitchCount >= 2){
-    cheatMessage.textContent = 'تم رصد مغادرة متكررة للصفحة أثناء الاختبار. جارٍ إنهاء المحاولة وإرسال نتيجتك الحالية فوراً.';
+  if(state.tabSwitchCount>=2){
+    cheatMessage.textContent='تم رصد مغادرة متكررة للصفحة أثناء الاختبار. جارٍ إنهاء المحاولة وإرسال نتيجتك الحالية فوراً.';
     cheatOverlay.classList.add('active');
     setTimeout(()=>{ cheatOverlay.classList.remove('active'); finishQuiz(true); }, 2200);
     return;
   }
-  if(!cheatOverlayShown){
-    cheatOverlayShown = true;
-    cheatMessage.textContent = customMsg || 'لاحظنا أنك غادرت شاشة الاختبار. الخروج مرة أخرى سيؤدي لإنهاء المحاولة تلقائياً وإرسال نتيجتك الحالية.';
-    cheatOverlay.classList.add('active');
-  }
+  if(!cheatOverlayShown){ cheatOverlayShown=true; cheatMessage.textContent = customMsg || 'لاحظنا أنك غادرت شاشة الاختبار. الخروج مرة أخرى سيؤدي لإنهاء المحاولة تلقائياً وإرسال نتيجتك الحالية.'; cheatOverlay.classList.add('active'); }
 }
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) triggerCheatWarning(); });
 window.addEventListener('blur', ()=>{ if(!document.hidden) triggerCheatWarning(); });
 
 /* ==================================================================
-   9) لوحة الآدمن المخفية — تظهر فقط عبر ?admin=1234
+   12) لوحة الآدمن المخفية — ?admin=1234
    ================================================================== */
 async function initAdminIfNeeded(){
   const params = new URLSearchParams(window.location.search);
-  if(params.get('admin') === ADMIN_SECRET){
-    showScreen('admin'); await loadAdminTable();
-    document.getElementById('admin-refresh').addEventListener('click', loadAdminTable);
-    return true;
-  }
+  if(params.get('admin') === ADMIN_SECRET){ showScreen('admin'); await loadAdminTable(); document.getElementById('admin-refresh').addEventListener('click', loadAdminTable); return true; }
   return false;
 }
 async function loadAdminTable(){
-  const tbody = document.getElementById('admin-table-body');
-  const emptyMsg = document.getElementById('admin-empty');
-  tbody.innerHTML = '';
-  const rows = await jsonbinGetAttempts();
-  rows.sort((a,b)=> (b.Date||'').localeCompare(a.Date||'') || (b.Score - a.Score));
-  if(!rows.length){ emptyMsg.classList.remove('hidden'); return; }
-  emptyMsg.classList.add('hidden');
-  let i = 1;
-  rows.forEach(d=>{
-    const pct = Math.round(((d.Score||0)/(d.Total||TOTAL_QUESTIONS))*100);
-    const statusBadge = d.Flagged
-      ? `<span class="text-[var(--rose)]">مُلغى (خروج من الصفحة)</span>`
-      : `<span class="text-[var(--emerald)]">مكتمل</span>`;
-    const tr = document.createElement('tr');
-    tr.className = 'border-t border-white/5';
-    tr.innerHTML = `
-      <td class="p-3 text-[var(--muted)]">${i++}</td>
-      <td class="p-3 font-semibold">${d.Name||'—'}</td>
-      <td class="p-3">${d.Score}/${d.Total}</td>
-      <td class="p-3">${pct}%</td>
-      <td class="p-3 text-[var(--muted)] text-xs">${d.Date||'—'}</td>
-      <td class="p-3 text-[var(--muted)] text-xs">${fmtDuration(d.DurationSeconds||0)}</td>
-      <td class="p-3 text-xs">${statusBadge}</td>`;
-    tbody.appendChild(tr);
+  const tbody = document.getElementById('admin-table-body'); const emptyMsg = document.getElementById('admin-empty');
+  const bannedBody = document.getElementById('banned-table-body');
+  tbody.innerHTML=''; bannedBody.innerHTML='';
+  const data = await jsonbinGetData();
+  const rows = data.attempts.slice().sort((a,b)=> b.Period - a.Period || b.Score - a.Score);
+  if(!rows.length){ emptyMsg.classList.remove('hidden'); } else {
+    emptyMsg.classList.add('hidden'); let i=1;
+    rows.forEach(d=>{
+      const pct = Math.round(((d.Score||0)/(d.Total||TOTAL_QUESTIONS))*100);
+      const statusBadge = d.Flagged ? `<span class="text-[var(--rose)]">مُلغى</span>` : `<span class="text-[var(--emerald)]">مكتمل</span>`;
+      const tr = document.createElement('tr'); tr.className='border-t border-white/5';
+      tr.innerHTML = `<td class="p-3 text-[var(--muted)]">${i++}</td><td class="p-3 font-semibold">${d.Name||'—'}</td><td class="p-3">${d.Score}/${d.Total}</td><td class="p-3">${pct}%</td><td class="p-3 text-[var(--muted)] text-xs">#${d.Period}</td><td class="p-3 text-[var(--muted)] text-xs">${fmtDuration(d.DurationSeconds||0)}</td><td class="p-3 text-xs">${statusBadge}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  data.banned.forEach((b,i)=>{
+    const tr = document.createElement('tr'); tr.className='border-t border-white/5';
+    tr.innerHTML = `<td class="p-3 text-[var(--muted)]">${i+1}</td><td class="p-3 font-semibold text-[var(--rose)]">${b.Name||'—'}</td><td class="p-3 text-[var(--muted)] text-xs">${b.Timestamp?new Date(b.Timestamp).toLocaleString('ar-EG'):'—'}</td>`;
+    bannedBody.appendChild(tr);
   });
 }
 
 /* ==================================================================
-   10) بدء التشغيل الفوري
+   13) بدء التشغيل
    ================================================================== */
 (async function init(){
   const isAdmin = await initAdminIfNeeded();
-  if(!isAdmin){ showScreen('welcome'); setLbTabs(); loadLeaderboard(); }
+  if(!isAdmin){
+    showScreen('welcome'); setLbTabs(); startCountdown();
+    const fp = getDeviceFingerprint();
+    const data = await jsonbinGetData();
+    if(data.banned.some(b=>b.Fingerprint===fp)){ entryCard.classList.add('hidden'); showBanned(); }
+    loadLeaderboard();
+  }
 })();
 </script>
 </body>
