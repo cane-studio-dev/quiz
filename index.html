@@ -360,6 +360,44 @@ function containsBadWord(name){
 }
 
 /* ==================================================================
+   3.1) تحقق صارم من صحة الاسم قبل أي شيء آخر:
+   - حروف عربية ومسافات فقط (بدون أرقام/رموز/إيموجي/إنجليزي)
+   - 3 كلمات على الأقل، كل كلمة حرفان فأكثر
+   - 10 أحرف إجمالاً على الأقل (بدون احتساب المسافات)
+   - رفض الأسماء الوهمية/الاستهزائية الشائعة
+   ================================================================== */
+const JUNK_NAME_WORDS = [
+  "هبل","عبيط","غبي","احمق","أحمق","فلان","فلانة","علان","تست","test","اختبار",
+  "لا اعرف","لا أعرف","مجهول","نكرة","وهمي","فاضي","بدون اسم","اسم","xxx","asd","asdf","qwerty",
+  "تجربة","جرب","محدش","عيان","زفت","تخين"
+];
+function validateStudentName(raw){
+  const val = raw.trim().replace(/\s+/g,' ');
+  if(!val) return { ok:false, msg:'يجب كتابة الاسم الثلاثي الصحيح' };
+
+  if(!/^[\u0621-\u064A\s]+$/.test(val)){
+    return { ok:false, msg:'يُسمح فقط بالحروف العربية — بدون أرقام أو رموز أو إيموجي أو حروف إنجليزية' };
+  }
+
+  const words = val.split(' ').filter(Boolean);
+  if(words.length < 3 || words.some(w => w.length < 2)){
+    return { ok:false, msg:'يجب كتابة الاسم الثلاثي الصحيح' };
+  }
+
+  const totalLetters = val.replace(/\s+/g,'').length;
+  if(totalLetters < 10){
+    return { ok:false, msg:'الاسم قصير جداً — يجب ألا يقل إجمالي الاسم عن 10 أحرف' };
+  }
+
+  const normalized = normalizeArabicText(val);
+  if(JUNK_NAME_WORDS.some(w => normalized.includes(normalizeArabicText(w)))){
+    return { ok:false, msg:'هذا يبدو اسماً وهمياً — يرجى كتابة اسمك الثلاثي الحقيقي' };
+  }
+
+  return { ok:true, value: val };
+}
+
+/* ==================================================================
    4) مولّد عشوائي ثابت لكل جولة (10 ساعات) — Seeded PRNG
    ================================================================== */
 function seededRandom(seedStr){
@@ -534,11 +572,15 @@ const entryCard = document.getElementById('entry-card');
 const lockedCard = document.getElementById('locked-card');
 const bannedCard = document.getElementById('banned-card');
 
-function isFullName(v){ return v.trim().split(/\s+/).filter(Boolean).length >= 3; }
-
 startBtn.addEventListener('click', async ()=>{
-  const val = nameInput.value.trim();
-  if(!isFullName(val)){ nameError.classList.remove('hidden'); nameInput.classList.add('border-[var(--rose)]'); return; }
+  const check = validateStudentName(nameInput.value);
+  if(!check.ok){
+    nameError.textContent = check.msg;
+    nameError.classList.remove('hidden');
+    nameInput.classList.add('border-[var(--rose)]');
+    return;
+  }
+  const val = check.value;
   nameError.classList.add('hidden'); nameInput.classList.remove('border-[var(--rose)]');
 
   const fp = getDeviceFingerprint();
