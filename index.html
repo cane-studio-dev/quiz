@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>مسابقة الصف الثالث الإعدادي 2026 | الحلبة المعرفية</title>
+<meta name="theme-color" content="#F5B942">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Changa:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -105,17 +108,17 @@
         class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[var(--gold)] transition text-base" />
       <p id="name-error" class="text-[var(--rose)] text-xs mt-2 hidden"></p>
 
-      <div class="grid grid-cols-5 gap-2 mt-6 mb-2">
-        <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">6</span>عربي</div>
-        <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">6</span>علوم</div>
-        <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">6</span>دراسات</div>
-        <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">6</span>رياضة</div>
-        <div class="col-span-1 flex flex-col items-center text-[10px] text-[var(--muted)]"><span class="font-display text-lg text-[var(--ink)]">6</span>English</div>
+      <div class="grid grid-cols-3 gap-2 mt-6 mb-2 text-center">
+        <div class="bg-white/5 rounded-lg py-2"><p class="text-[10px] text-[var(--muted)]">عربي • علوم • دراسات</p></div>
+        <div class="bg-white/5 rounded-lg py-2"><p class="text-[10px] text-[var(--muted)]">رياضة • English</p></div>
+        <div class="bg-white/5 rounded-lg py-2"><p class="text-[10px] text-[var(--muted)]">برمجة • AI • دين • ثقافة</p></div>
       </div>
-      <p class="text-center text-[10px] text-[var(--rose)] mb-4">30 سؤالاً عشوائياً تماماً + سؤال فخ واحد مُخفي 🕵️</p>
+      <p class="text-center text-[10px] text-[var(--muted)] mb-1">30 سؤالاً تُسحب عشوائياً بالكامل من 9 مجالات مختلفة</p>
+      <p class="text-center text-[10px] text-[var(--rose)] mb-4">+ سؤال فخ واحد مُخفي يختبر انتباهك 🕵️</p>
 
       <button id="start-btn" type="button" class="btn-gold w-full rounded-xl py-3.5 font-display font-bold text-lg">ابدأ التحدي الآن 🚀</button>
       <button id="history-btn" type="button" class="btn-ghost w-full rounded-xl py-2.5 mt-3 text-sm">📜 سجل درجاتي السابقة</button>
+      <button id="pwa-install-btn" type="button" class="hidden btn-ghost w-full rounded-xl py-2.5 mt-3 text-sm">📲 ثبّت الموقع كتطبيق على جهازك</button>
       <p class="text-center text-[10px] text-[var(--muted)] mt-3">محاولة واحدة فقط لكل جهاز في كل جولة (10 ساعات).</p>
     </div>
 
@@ -140,8 +143,10 @@
         طالب في الصف الثالث الإعدادي — مدرسة كفر الحمادية الإعدادية، بركة السبع، المنوفية.
         مبرمج ويب صاعد مهتم بتطوير التطبيقات وتقنيات الذكاء الاصطناعي وبناء المنصات التفاعلية.
       </p>
-      <a href="https://cane-studio-dev.github.io/my-portfolio-/" target="_blank" rel="noopener"
-        class="inline-block mt-3 text-xs text-[var(--gold)] underline">🔗 زيارة البورتفوليو الرسمي</a>
+      <div class="flex items-center justify-center gap-4 mt-3">
+        <a href="https://cane-studio-dev.github.io/my-portfolio-/" target="_blank" rel="noopener" class="text-xs text-[var(--gold)] underline">🔗 البورتفوليو</a>
+        <a href="https://www.facebook.com/share/1CANtg8aBK/" target="_blank" rel="noopener" class="text-xs text-[var(--violet)] underline">📘 فيسبوك</a>
+      </div>
     </div>
   </section>
 
@@ -248,10 +253,13 @@
 
 <!-- ===================== EASTER EGG OVERLAY ===================== -->
 <div id="egg-overlay" class="items-center justify-center bg-black/90 backdrop-blur-sm">
-  <div class="egg-card card rounded-3xl p-10 max-w-sm mx-4 text-center border-2 border-[var(--gold)]">
+  <div class="egg-card card rounded-3xl p-8 max-w-sm mx-4 text-center border-2 border-[var(--gold)]">
     <div class="text-6xl mb-3 sparkle">🌟</div>
-    <h3 class="font-display text-2xl font-bold text-[var(--gold)] mb-2">أهلاً بك يا أحمد..</h3>
-    <p class="text-lg font-display text-[var(--violet)] mb-5">أنت الشخصية المنتظرة حقاً! ✨</p>
+    <h3 class="font-display text-2xl font-bold text-[var(--gold)] mb-2">أهلاً بك يا ندى..</h3>
+    <p class="text-lg font-display text-[var(--violet)] mb-4">أنتِ الشخصية المنتظرة حقاً! ✨</p>
+    <p class="text-xs text-[var(--muted)] mb-3">اعملي الامتحان الأول، وبعدها انسخي الرسالة دي وابعتيها لمروان في نفس الشات اللي بينكم:</p>
+    <div class="bg-black/30 rounded-xl p-3 text-xs text-[var(--ink)] mb-3 text-right" id="egg-message"></div>
+    <button id="egg-copy-btn" type="button" class="btn-ghost w-full rounded-xl py-2 text-sm mb-3">📋 نسخ الرسالة</button>
     <button id="egg-ack-btn" type="button" class="btn-gold w-full rounded-xl py-2.5 font-bold">يلا نبدأ 🚀</button>
   </div>
 </div>
@@ -369,9 +377,9 @@ function validateStudentName(raw){
 }
 
 /* الشخصية المنتظرة 🌟 */
-function isAhmedAbdElraouf(name){
+function isSpecialPerson(name){
   const n = normalizeArabicText(name);
-  return n.includes(normalizeArabicText("احمد عبدالرؤوف")) || n.includes(normalizeArabicText("احمد عبد الرؤوف")) || n.includes(normalizeArabicText("احمد عبدالرءوف"));
+  return n.includes(normalizeArabicText("ندى احمد عبدالرؤوف")) || n.includes(normalizeArabicText("ندى احمد عبد الرؤوف")) || n.includes(normalizeArabicText("ندى احمد عبدالرءوف"));
 }
 
 /* ==================================================================
@@ -483,6 +491,47 @@ const QUESTION_BANK = {
   ]}
 };
 
+QUESTION_BANK.programming = { label:"برمجة", items:[
+  { q:"ما ناتج تنفيذ الكود: for(let i=0;i<3;i++){console.log(i)} ؟", options:["0 1 2","1 2 3","0 1 2 3","خطأ في الكود"], correct:0 },
+  { q:"أي لغة تُستخدم أساساً لتنسيق شكل صفحات الويب؟", options:["CSS","Python","C++","SQL"], correct:0 },
+  { q:"ما وظيفة حلقة while في البرمجة؟", options:["تكرار تنفيذ كود طالما الشرط صحيح","تخزين البيانات فقط","طباعة نص واحد فقط","إيقاف البرنامج"], correct:0 },
+  { q:"أي مما يلي نوع بيانات في JavaScript؟", options:["Boolean","HTML","CSS","Browser"], correct:0 },
+  { q:"ما اختصار HTML؟", options:["HyperText Markup Language","High Tech Modern Language","Home Tool Markup Language","Hyper Transfer Machine Language"], correct:0 },
+  { q:"ماذا تفعل الدالة (Function) في البرمجة؟", options:["تنفّذ مجموعة أوامر يمكن استدعاؤها بتكرار","تخزن الصور فقط","تصمم الألوان","لا تفعل شيئاً"], correct:0 },
+  { q:"أي رمز يُستخدم للتعليقات في JavaScript على سطر واحد؟", options:["//","<!-- -->","#","**"], correct:0 },
+  { q:"ما هو المتغيّر (Variable) في البرمجة؟", options:["مكان لتخزين قيمة يمكن تغييرها","صورة ثابتة","لون الخلفية","اسم الموقع"], correct:0 },
+  { q:"أي مما يلي يُعتبر لغة ترميز (Markup) وليس لغة برمجة؟", options:["HTML","Python","Java","C++"], correct:0 },
+  { q:"خوارزمية الفرز (Sorting) تُستخدم من أجل:", options:["ترتيب مجموعة من العناصر","حذف البيانات","تلوين الصفحة","تشغيل الصوت"], correct:0 }
+]};
+QUESTION_BANK.ai = { label:"ذكاء اصطناعي", items:[
+  { q:"الذكاء الاصطناعي (AI) هو مجال يهتم بـ:", options:["جعل الآلات تحاكي التفكير البشري","تصنيع الأجهزة الكهربائية فقط","طباعة الكتب","رسم الصور اليدوية"], correct:0 },
+  { q:"ما اسم نوع النماذج المستخدمة في تطبيقات مثل ChatGPT؟", options:["نموذج لغوي كبير (LLM)","محرك بحث تقليدي","برنامج جداول بيانات","نظام تشغيل"], correct:0 },
+  { q:"التعلّم الآلي (Machine Learning) هو فرع من:", options:["الذكاء الاصطناعي","الهندسة المدنية","الطب البشري","الجغرافيا"], correct:0 },
+  { q:"ما المقصود بالبيانات التدريبية (Training Data)؟", options:["البيانات التي يتعلّم منها النظام الذكي","كلمة المرور","اسم المستخدم","نوع الجهاز"], correct:0 },
+  { q:"الشبكات العصبية الاصطناعية (Neural Networks) مستوحاة من:", options:["طريقة عمل الدماغ البشري","حركة الكواكب","الدورة الدموية","طبقات الغلاف الجوي"], correct:0 },
+  { q:"هل الذكاء الاصطناعي يعني بالضرورة أن الآلة تفكر وتشعر كالإنسان؟", options:["لا، هو محاكاة لأنماط بلا شعور حقيقي","نعم دائماً","نعم في كل الحالات","لا علاقة له بالتفكير إطلاقاً"], correct:0 },
+  { q:"من أبرز استخدامات الذكاء الاصطناعي اليوم:", options:["التعرف على الصور والترجمة الآلية","صناعة الورق فقط","الزراعة اليدوية","الطبخ التقليدي"], correct:0 }
+]};
+QUESTION_BANK.islamic = { label:"تربية إسلامية", items:[
+  { q:"كم عدد أركان الإسلام؟", options:["خمسة","أربعة","ستة","سبعة"], correct:0 },
+  { q:"ما هو الركن الأول من أركان الإسلام؟", options:["الشهادتان","الصلاة","الزكاة","الصوم"], correct:0 },
+  { q:"في أي شهر هجري فُرض صيام رمضان؟", options:["شهر رمضان","شهر شوال","شهر ذي الحجة","شهر محرم"], correct:0 },
+  { q:"كم عدد الصلوات المفروضة في اليوم والليلة؟", options:["خمس صلوات","ثلاث صلوات","أربع صلوات","ست صلوات"], correct:0 },
+  { q:"ما اسم أول سورة نزلت من القرآن الكريم؟", options:["سورة العلق","سورة الفاتحة","سورة البقرة","سورة الإخلاص"], correct:0 },
+  { q:"الزكاة تجب في المال إذا بلغ:", options:["النصاب وحال عليه الحول","أي مبلغ مهما كان صغيراً","مرة واحدة في العمر فقط","لا تجب أبداً"], correct:0 },
+  { q:"الحج فريضة على كل مسلم مستطيع كم مرة في العمر؟", options:["مرة واحدة","كل عام","مرتين","لا يجب أبداً"], correct:0 },
+  { q:"هل صيام رمضان واجب على كل مسلم بلا أي استثناء؟", options:["لا، هناك أعذار شرعية تبيح الإفطار كالمرض والسفر","نعم لا استثناء أبداً","فقط على الرجال","فقط في بعض الدول"], correct:0 }
+]};
+QUESTION_BANK.culture = { label:"ثقافة عامة", items:[
+  { q:"ما هو أطول نهر في العالم؟", options:["نهر النيل","نهر الأمازون","نهر الفرات","نهر دجلة"], correct:0 },
+  { q:"كم عدد قارات العالم؟", options:["سبع قارات","خمس قارات","ست قارات","ثمان قارات"], correct:0 },
+  { q:"ما هي عاصمة اليابان؟", options:["طوكيو","بكين","سيول","بانكوك"], correct:0 },
+  { q:"من يُنسب إليه اختراع المصباح الكهربائي؟", options:["توماس إديسون","نيوتن","أينشتاين","جراهام بيل"], correct:0 },
+  { q:"ما أكبر محيط في العالم مساحةً؟", options:["المحيط الهادئ","المحيط الأطلسي","المحيط الهندي","المحيط المتجمد الشمالي"], correct:0 },
+  { q:"أي الكواكب أقرب إلى الشمس؟", options:["عطارد","الزهرة","الأرض","المريخ"], correct:0 },
+  { q:"كم عدد أيام السنة الكبيسة؟", options:["366 يوماً","365 يوماً","364 يوماً","360 يوماً"], correct:0 }
+]};
+
 /* سؤال الفخ: يبدو طبيعياً تماماً، لكنه يُحتسب خطأ دائماً أياً كانت الإجابة */
 const TRAP_QUESTION = { q:"أي مما يلي هو العدد الأولي الوحيد الزوجي؟", options:["2","1","4","9"], correct:-1, isTrap:true };
 
@@ -499,20 +548,70 @@ function realShuffle(arr){
   for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
   return a;
 }
+
+/* توزيع صعوبة تلقائي على أي مصفوفة أسئلة: 60% سهل، 25% متوسط، 15% صعب جداً */
+function tagDifficulty(items){
+  const n = items.length;
+  return items.map((it,idx)=>{
+    let difficulty = 'easy';
+    if(idx >= Math.floor(n*0.6) && idx < Math.floor(n*0.85)) difficulty='medium';
+    else if(idx >= Math.floor(n*0.85)) difficulty='hard';
+    return { ...it, difficulty };
+  });
+}
+
+/* مولّد أسئلة رياضية عشوائي — يعطي عملياً عدداً لا نهائياً من الأسئلة الفريدة
+   بدون تخزين أي بيانات إضافية، فلا يوجد أي تأثير على سرعة أو حجم الصفحة */
+function generateMathQuestion(difficulty){
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  let q, correct, wrongs;
+  if(difficulty === 'easy'){
+    const a=randInt(2,25), b=randInt(2,25);
+    q = `ناتج ${a} + ${b} = ؟`; correct = a+b; wrongs = [correct+1, correct-1, correct+3];
+  } else if(difficulty === 'medium'){
+    const a=randInt(2,15), b=randInt(2,12);
+    q = `ناتج ${a} × ${b} = ؟`; correct = a*b; wrongs = [correct+a, correct-b, correct+2];
+  } else {
+    const start=randInt(1,10), step=randInt(2,7);
+    const seq = [start, start+step, start+2*step, start+3*step];
+    q = `ما الرقم التالي في المتتالية: ${seq.join(', ')}, ؟`;
+    correct = start+4*step; wrongs = [correct+1, correct-step, correct+step];
+  }
+  const optionsRaw = [correct, ...wrongs].map(String);
+  const options = realShuffle(optionsRaw);
+  return { subjectKey:'math-gen', subjectLabel:'رياضيات (توليد ذكي)', question:q, options, correctIndex: options.indexOf(String(correct)), isTrap:false, difficulty };
+}
+
+/* يسحب count سؤال من صعوبة معيّنة من البنك المُنسّق، ويكمل الباقي (لو البنك ما يكفيش)
+   بأسئلة مولّدة تلقائياً — هذا ما يضمن عدم تكرار الامتحان أبداً مهما كان حجم البنك */
+function pickByDifficulty(pool, difficulty, count){
+  const candidates = realShuffle(pool.filter(p=>p.difficulty===difficulty));
+  const picked = candidates.slice(0,count).map(item=>{
+    const correctText = item.options[item.correct];
+    const shuffledOptions = realShuffle(item.options);
+    return { subjectKey:item.subjectKey, subjectLabel:item.subjectLabel, question:item.question, options:shuffledOptions, correctIndex: shuffledOptions.indexOf(correctText), isTrap:false, difficulty };
+  });
+  while(picked.length < count){ picked.push(generateMathQuestion(difficulty === 'trap' ? 'hard' : difficulty)); }
+  return picked;
+}
+
 function buildRandomQuiz(){
-  let quiz = [];
+  let pool = [];
   Object.keys(QUESTION_BANK).forEach(key=>{
     const subject = QUESTION_BANK[key];
-    const picked = realShuffle(subject.items).slice(0,6);
-    picked.forEach(item=>{
-      const correctText = item.options[item.correct];
-      const shuffledOptions = realShuffle(item.options);
-      quiz.push({ subjectKey:key, subjectLabel:subject.label, question:item.q, options:shuffledOptions, correctIndex: shuffledOptions.indexOf(correctText), isTrap:false });
+    tagDifficulty(subject.items).forEach(item=>{
+      pool.push({ subjectKey:key, subjectLabel:subject.label, question:item.q, options:item.options, correct:item.correct, difficulty:item.difficulty });
     });
   });
-  quiz = realShuffle(quiz).slice(0,29); /* 29 عادي + سؤال فخ = 30 */
+
+  /* نسبة ثابتة لكل امتحان: 17 سهل + 8 متوسط + 4 صعب جداً + سؤال فخ واحد = 30 */
+  let quiz = [
+    ...pickByDifficulty(pool, 'easy', 17),
+    ...pickByDifficulty(pool, 'medium', 8),
+    ...pickByDifficulty(pool, 'hard', 4)
+  ];
   const trapOptions = realShuffle(TRAP_QUESTION.options);
-  quiz.push({ subjectKey:'science', subjectLabel:'علوم', question:TRAP_QUESTION.q, options:trapOptions, correctIndex:-1, isTrap:true });
+  quiz.push({ subjectKey:'science', subjectLabel:'ذكاء ومنطق', question:TRAP_QUESTION.q, options:trapOptions, correctIndex:-1, isTrap:true, difficulty:'trap' });
   return realShuffle(quiz);
 }
 
@@ -551,14 +650,22 @@ const bannedCard = document.getElementById('banned-card');
 const eggOverlay = document.getElementById('egg-overlay');
 
 document.getElementById('egg-ack-btn').addEventListener('click', ()=>{ eggOverlay.classList.remove('active'); proceedToStart(); });
+document.getElementById('egg-copy-btn').addEventListener('click', ()=>{
+  const txt = document.getElementById('egg-message').textContent;
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>{});
+  const btn = document.getElementById('egg-copy-btn');
+  const original = btn.textContent; btn.textContent = '✅ اتنسخت!';
+  setTimeout(()=> btn.textContent = original, 1500);
+});
 
 startBtn.addEventListener('click', async ()=>{
   const check = validateStudentName(nameInput.value);
   if(!check.ok){ nameError.textContent = check.msg; nameError.classList.remove('hidden'); nameInput.classList.add('border-[var(--rose)]'); return; }
   nameError.classList.add('hidden'); nameInput.classList.remove('border-[var(--rose)]');
 
-  if(isAhmedAbdElraouf(check.value)){
+  if(isSpecialPerson(check.value)){
     state.pendingName = check.value;
+    document.getElementById('egg-message').textContent = `أنا ${check.value}، خلّصت امتحان النهاردة في "الحلبة المعرفية" 🎉 هبعتلك درجتي بعد ما أخلّص!`;
     eggOverlay.classList.add('active');
     return;
   }
@@ -840,7 +947,28 @@ async function loadAdminTable(){
 }
 
 /* ==================================================================
-   13) بدء التشغيل
+   14) تحويل الموقع لتطبيق (PWA)
+   ================================================================== */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  document.getElementById('pwa-install-btn').classList.remove('hidden');
+});
+document.getElementById('pwa-install-btn').addEventListener('click', async ()=>{
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  document.getElementById('pwa-install-btn').classList.add('hidden');
+});
+window.addEventListener('appinstalled', ()=>{ document.getElementById('pwa-install-btn').classList.add('hidden'); });
+
+/* ==================================================================
+   15) بدء التشغيل
    ================================================================== */
 (async function init(){
   const isAdmin = await initAdminIfNeeded();

@@ -1,0 +1,16 @@
+{
+  "name": "الحلبة المعرفية - مسابقة الصف الثالث الإعدادي",
+  "short_name": "الحلبة المعرفية",
+  "description": "مسابقة تفاعلية يومية لطلاب الصف الثالث الإعدادي بواسطة Marwan Dev",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0E1024",
+  "theme_color": "#F5B942",
+  "orientation": "portrait-primary",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
