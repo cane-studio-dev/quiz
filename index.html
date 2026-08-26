@@ -376,10 +376,11 @@ function validateStudentName(raw){
   return { ok:true, value: val };
 }
 
-/* الشخصية المنتظرة 🌟 */
+/* الشخصية المنتظرة 🌟 — تُفعَّل لو الاسم فيه أي صيغة من اسم ندى */
 function isSpecialPerson(name){
   const n = normalizeArabicText(name);
-  return n.includes(normalizeArabicText("ندى احمد عبدالرؤوف")) || n.includes(normalizeArabicText("ندى احمد عبد الرؤوف")) || n.includes(normalizeArabicText("ندى احمد عبدالرءوف"));
+  const variants = ["ندى", "نداء", "ندي"];
+  return variants.some(v => n.includes(normalizeArabicText(v)));
 }
 
 /* ==================================================================
