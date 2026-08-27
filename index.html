@@ -12,9 +12,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Changa:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0E1024; --bg-soft:#171A3D; --bg-card:#1D2148;
+    --bg:#0B0D22; --bg-soft:#161A3F; --bg-card:#1C2050;
     --gold:#F5B942; --gold-2:#E08E2C; --violet:#8B7CF6;
-    --emerald:#22C99B; --rose:#FB5678; --ink:#F5F3FF; --muted:#9CA3D1;
+    --emerald:#22C99B; --rose:#FB5678; --ink:#F7F5FF; --muted:#9CA3D1;
   }
   *{ -webkit-tap-highlight-color: transparent; }
   html,body{ background:var(--bg); color:var(--ink); font-family:'Cairo',sans-serif; }
@@ -22,45 +22,94 @@
   body{ user-select:none; -webkit-user-select:none; -moz-user-select:none; }
   input, textarea{ user-select:text; -webkit-user-select:text; }
   ::selection{ background:transparent; }
+
   .bg-arena{
-    background:
-      radial-gradient(circle at 15% 10%, rgba(139,124,246,.18), transparent 40%),
-      radial-gradient(circle at 90% 20%, rgba(245,185,66,.14), transparent 45%),
-      radial-gradient(circle at 50% 100%, rgba(34,201,155,.10), transparent 45%),
-      var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(139,124,246,.20), transparent 42%),
+      radial-gradient(circle at 92% 18%, rgba(245,185,66,.16), transparent 48%),
+      radial-gradient(circle at 50% 105%, rgba(34,201,155,.12), transparent 50%),
+      radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+      linear-gradient(180deg, var(--bg), var(--bg));
+    background-size: auto, auto, auto, 26px 26px, auto;
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
     transition: background .6s ease;
   }
-  .card{ background:linear-gradient(180deg, var(--bg-card), var(--bg-soft)); border:1px solid rgba(245,185,66,.12); }
+
+  .card{
+    background:linear-gradient(165deg, var(--bg-card) 0%, var(--bg-soft) 100%);
+    border:1px solid rgba(245,185,66,.14);
+    box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 20px 40px -24px rgba(0,0,0,.6);
+    position:relative;
+  }
+  .card::before{
+    content:''; position:absolute; inset:0 0 auto 0; height:1px; border-radius:inherit;
+    background:linear-gradient(90deg, transparent, rgba(245,185,66,.35), transparent);
+    pointer-events:none;
+  }
   .hexagon{ clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0% 50%); }
-  .btn-gold{ background:linear-gradient(135deg, var(--gold), var(--gold-2)); color:#241505; box-shadow:0 8px 24px -8px rgba(245,185,66,.55); transition: background .5s ease; }
+
+  .btn-gold{
+    background:linear-gradient(135deg, var(--gold), var(--gold-2));
+    color:#241505; box-shadow:0 10px 26px -10px rgba(245,185,66,.65), 0 0 0 1px rgba(255,255,255,.08) inset;
+    transition: background .5s ease, transform .12s ease, box-shadow .2s ease;
+    position:relative; overflow:hidden;
+  }
+  .btn-gold:hover:not(:disabled){ box-shadow:0 12px 30px -8px rgba(245,185,66,.75), 0 0 0 1px rgba(255,255,255,.1) inset; }
   .btn-gold:disabled{ opacity:.45; box-shadow:none; }
   .btn-gold:active:not(:disabled){ transform:translateY(1px) scale(.99); }
-  .btn-ghost{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); }
-  .option-btn{ transition:all .15s ease; border:1.5px solid rgba(255,255,255,.08); cursor:pointer; }
-  .option-btn:hover{ border-color:rgba(245,185,66,.5); background:rgba(245,185,66,.06); }
-  .option-correct{ border-color:var(--emerald)!important; background:rgba(34,201,155,.14)!important; }
-  .option-wrong{ border-color:var(--rose)!important; background:rgba(251,86,120,.14)!important; }
-  .hard-tag{ background:rgba(251,86,120,.16); color:var(--rose); border:1px solid rgba(251,86,120,.35); }
+
+  .btn-ghost{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); transition: background .2s ease, border-color .2s ease; }
+  .btn-ghost:hover{ background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.24); }
+
+  .option-btn{ transition:all .15s ease; border:1.5px solid rgba(255,255,255,.09); cursor:pointer; }
+  .option-btn:hover{ border-color:rgba(245,185,66,.55); background:rgba(245,185,66,.08); transform:translateY(-1px); }
+  .option-correct{ border-color:var(--emerald)!important; background:rgba(34,201,155,.16)!important; box-shadow:0 0 0 1px rgba(34,201,155,.3) inset; }
+  .option-wrong{ border-color:var(--rose)!important; background:rgba(251,86,120,.16)!important; box-shadow:0 0 0 1px rgba(251,86,120,.3) inset; }
+  .hard-tag{ background:rgba(251,86,120,.18); color:var(--rose); border:1px solid rgba(251,86,120,.4); font-weight:700; }
+
   .screen{ display:none; }
-  .screen.active{ display:block; animation:rise .35s ease; }
-  @keyframes rise{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)} }
+  .screen.active{ display:block; animation:rise .4s cubic-bezier(.22,1,.36,1); }
+  @keyframes rise{ from{opacity:0; transform:translateY(18px)} to{opacity:1; transform:translateY(0)} }
+
   .progress-track{ background:rgba(255,255,255,.08); }
-  .progress-fill{ background:linear-gradient(90deg, var(--violet), var(--gold)); transition:width .4s ease; }
+  .progress-fill{ background:linear-gradient(90deg, var(--violet), var(--gold)); transition:width .4s ease; position:relative; overflow:hidden; }
   .subject-chip{ font-family:'Changa',sans-serif; letter-spacing:.5px; }
+
   #cheat-overlay,#egg-overlay{ position:fixed; inset:0; z-index:60; display:none; }
   #cheat-overlay.active,#egg-overlay.active{ display:flex; }
+
   .medal-glow{ animation:pulse-medal 2.4s ease-in-out infinite; }
-  @keyframes pulse-medal{ 0%,100%{ box-shadow:0 0 0 0 rgba(245,185,66,.35);} 50%{ box-shadow:0 0 0 14px rgba(245,185,66,0);} }
+  @keyframes pulse-medal{ 0%,100%{ box-shadow:0 0 0 0 rgba(245,185,66,.4);} 50%{ box-shadow:0 0 0 16px rgba(245,185,66,0);} }
   @keyframes egg-pop{ 0%{ transform:scale(.6) rotate(-8deg); opacity:0 } 60%{ transform:scale(1.08) rotate(2deg); opacity:1 } 100%{ transform:scale(1) rotate(0); opacity:1 } }
   .egg-card{ animation: egg-pop .5s ease; }
   @keyframes sparkle{ 0%,100%{ opacity:.4 } 50%{ opacity:1 } }
   .sparkle{ animation: sparkle 1.4s ease-in-out infinite; }
   @media(prefers-reduced-motion: reduce){ *{ animation:none!important; transition:none!important; } }
   ::-webkit-scrollbar{ width:6px; }
-  ::-webkit-scrollbar-thumb{ background:rgba(245,185,66,.3); border-radius:8px; }
-  .lb-row{ display:flex; align-items:center; justify-content:space-between; }
+  ::-webkit-scrollbar-thumb{ background:rgba(245,185,66,.35); border-radius:8px; }
+
+  .lb-row{ display:flex; align-items:center; justify-content:space-between; border:1px solid transparent; transition:border-color .2s ease, background .2s ease; }
+  .lb-row:hover{ border-color:rgba(245,185,66,.25); background:rgba(255,255,255,.07); }
   .tab-btn{ transition:all .15s ease; }
-  .tab-btn.active{ background:rgba(245,185,66,.16); color:var(--gold); border-color:rgba(245,185,66,.4); }
+  .tab-btn.active{ background:rgba(245,185,66,.18); color:var(--gold); border-color:rgba(245,185,66,.45); box-shadow:0 0 0 1px rgba(245,185,66,.2) inset; }
+
+  /* إضاءة متحركة ديناميكية حوالين الشاشة كلها */
+  body::before{
+    content:'';
+    position:fixed; inset:0;
+    padding:3px;
+    background: conic-gradient(from 0deg, var(--gold), var(--violet), var(--emerald), var(--rose), var(--gold));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    animation: glow-hue 7s linear infinite, glow-pulse 3s ease-in-out infinite;
+    pointer-events:none;
+    z-index:9999;
+  }
+  @keyframes glow-hue{ 0%{ filter:hue-rotate(0deg) saturate(1.3); } 100%{ filter:hue-rotate(360deg) saturate(1.3); } }
+  @keyframes glow-pulse{ 0%,100%{ opacity:.55; } 50%{ opacity:.9; } }
+  @media(prefers-reduced-motion: reduce){ body::before{ display:none; } }
 </style>
 </head>
 <body class="bg-arena min-h-screen">
@@ -417,6 +466,14 @@ const QUESTION_BANK = {
     { q:"«يا طالبَ العلمِ اجتهدْ» أسلوب:", options:["نداء","تعجب","قسم","شرط"], correct:0 },
     { q:"علامة نصب جمع المؤنث السالم:", options:["الكسرة","الفتحة","الياء","الألف"], correct:0 },
     { q:"في جملة «نجح الطالبُ المجتهدُ» الفاعل هو:", options:["الطالبُ","المجتهدُ","نجح","لا يوجد فاعل"], correct:0 },
+    { q:"نوع الفعل «كتبَ» من حيث الزمن:", options:["ماضٍ","مضارع","أمر","اسم فعل"], correct:0 },
+    { q:"جمع كلمة «معلم» جمع مذكر سالم هو:", options:["معلمون","معلمات","معالم","معلمين فقط"], correct:0 },
+    { q:"الأصل في الفعل المضارع أن يكون معرباً إلا إذا اتصلت به:", options:["نون النسوة أو نون التوكيد","تاء التأنيث","ياء المخاطبة فقط","لا شيء مما سبق"], correct:0 },
+    { q:"«ربّ رجلٍ كريمٍ لقيته» ربّ هنا حرف:", options:["جر يفيد التقليل أو التكثير","نصب","جزم","عطف"], correct:0 },
+    { q:"علامة جزم الفعل المضارع الصحيح الآخر:", options:["السكون","الفتحة","الضمة","حذف النون"], correct:0 },
+    { q:"نوع الأسلوب في: «هل حضر الطالب؟»", options:["استفهام","نداء","تعجب","أمر"], correct:0 },
+    { q:"الفعل الذي يدل على طلب حدوث الفعل يسمى:", options:["فعل أمر","فعل ماضٍ","فعل مضارع","اسم فعل"], correct:0 },
+    { q:"«نعمَ» و«بئسَ» من أفعال:", options:["المدح والذم","الشروع","المقاربة","الرجاء"], correct:0 },
     { q:"أيّ الأسماء التالية ممنوع من الصرف؟", options:["أحمدُ","محمدٌ","رجلٌ","كتابٌ"], correct:0 }
   ]},
   science: { label:"علوم", items:[
@@ -435,6 +492,14 @@ const QUESTION_BANK = {
     { q:"الأوعية التي تحمل الدم من القلب إلى أعضاء الجسم:", options:["الشرايين","الأوردة","الشعيرات الدموية فقط","لا شيء مما سبق"], correct:0 },
     { q:"من مصادر الطاقة المتجددة:", options:["الطاقة الشمسية","الفحم","البترول","الغاز الطبيعي"], correct:0 },
     { q:"انتقال الحرارة عبر الفراغ يسمى:", options:["الإشعاع","التوصيل","الحمل","الانصهار"], correct:0 },
+    { q:"أكبر كوكب في المجموعة الشمسية هو:", options:["المشتري","زحل","الأرض","المريخ"], correct:0 },
+    { q:"الوحدة الأساسية لبناء جسم الكائن الحي هي:", options:["الخلية","الأنسجة","الأعضاء","الذرة"], correct:0 },
+    { q:"غاز الأكسجين ضروري لعملية:", options:["التنفس","البناء الضوئي فقط","الهضم فقط","الإخراج فقط"], correct:0 },
+    { q:"سرعة الضوء في الفراغ تُقدَّر تقريباً بـ:", options:["300000 كم/ث","300 كم/ث","3000 كم/ث","30000000 كم/ث"], correct:0 },
+    { q:"المغناطيس له قطبان هما:", options:["الشمالي والجنوبي","الشرقي والغربي","العلوي والسفلي","الأمامي والخلفي"], correct:0 },
+    { q:"غاز ثاني أكسيد الكربون تستهلكه النباتات في:", options:["البناء الضوئي","التنفس فقط","الإخراج","الهضم"], correct:0 },
+    { q:"أخف العناصر وأكثرها انتشاراً في الكون هو:", options:["الهيدروجين","الأكسجين","الكربون","النيتروجين"], correct:0 },
+    { q:"جهاز الدوران في جسم الإنسان مسؤول عن:", options:["نقل الدم والأكسجين لخلايا الجسم","الهضم فقط","التنفس فقط","التفكير"], correct:0 },
     { q:"ما نوع الرابطة الكيميائية بين ذرات الصوديوم والكلور في ملح الطعام؟", options:["رابطة أيونية","رابطة تساهمية","رابطة فلزية","رابطة هيدروجينية"], correct:0 }
   ]},
   social: { label:"دراسات", items:[
@@ -453,6 +518,14 @@ const QUESTION_BANK = {
     { q:"المناخ السائد في معظم أراضي مصر هو مناخ:", options:["صحراوي جاف","استوائي ممطر","قطبي بارد","معتدل ماطر"], correct:0 },
     { q:"شبه جزيرة سيناء تقع في قارة:", options:["آسيا","أفريقيا","أوروبا","أستراليا"], correct:0 },
     { q:"من أهم الممرات الملاحية الدولية التي تملكها مصر:", options:["قناة السويس","مضيق جبل طارق","قناة بنما","مضيق ماجلان"], correct:0 },
+    { q:"أشهر آثار الحضارة الفرعونية المسجلة ضمن عجائب الدنيا السبع القديمة:", options:["الهرم الأكبر بالجيزة","برج إيفل","سور الصين العظيم","تاج محل"], correct:0 },
+    { q:"أكبر الصحاري في العالم من حيث المساحة:", options:["الصحراء الكبرى","صحراء جوبي","صحراء كالاهاري","صحراء أستراليا"], correct:0 },
+    { q:"أطول سلسلة جبال في العالم هي:", options:["جبال الأنديز","جبال الألب","جبال الهيمالايا","جبال الأورال"], correct:0 },
+    { q:"من أهم المحاصيل الزراعية التصديرية لمصر:", options:["القطن","القمح فقط","الأرز فقط","الذرة فقط"], correct:0 },
+    { q:"عاصمة المملكة العربية السعودية:", options:["الرياض","جدة","مكة المكرمة","الدمام"], correct:0 },
+    { q:"أكبر دولة في العالم من حيث المساحة:", options:["روسيا","الصين","كندا","الولايات المتحدة"], correct:0 },
+    { q:"المسافة بين خطي طول متتاليين تُقاس بوحدة:", options:["الدرجة","الكيلومتر فقط","الميل فقط","المتر فقط"], correct:0 },
+    { q:"من أهم الموانئ المصرية على البحر المتوسط:", options:["ميناء الإسكندرية","ميناء جدة","ميناء دبي","ميناء بيروت"], correct:0 },
     { q:"في أي عصر تم بناء الأهرامات الثلاثة الكبرى بالجيزة؟", options:["الدولة القديمة","الدولة الوسطى","الدولة الحديثة","العصر البطلمي"], correct:0 }
   ]},
   math: { label:"رياضيات", items:[
@@ -471,6 +544,14 @@ const QUESTION_BANK = {
     { q:"حجم مكعب طول ضلعه 3 سم يساوي:", options:["27 سم³","9 سم³","18 سم³","6 سم³"], correct:0 },
     { q:"الزاوية التي قياسها بين 90° و180° تُسمى:", options:["منفرجة","حادة","قائمة","مستقيمة"], correct:0 },
     { q:"ناتج (−3) × (−4) يساوي:", options:["12","−12","7","−7"], correct:0 },
+    { q:"ناتج جذر العدد 81 هو:", options:["9","8","7","10"], correct:0 },
+    { q:"محيط المستطيل يساوي:", options:["2×(الطول+العرض)","الطول×العرض","الطول+العرض","نصف الطول×العرض"], correct:0 },
+    { q:"العدد 0 يُعتبر:", options:["عدداً صحيحاً وليس أولياً","عدداً أولياً","عدداً كسرياً","لا شيء مما سبق"], correct:0 },
+    { q:"نسبة 25% تساوي كسراً عادياً:", options:["1/4","1/2","3/4","1/5"], correct:0 },
+    { q:"قيمة س في المعادلة 3س=15 هي:", options:["5","3","15","45"], correct:0 },
+    { q:"الزاوية القائمة تساوي:", options:["90°","180°","45°","60°"], correct:0 },
+    { q:"ناتج (5)² هو:", options:["25","10","15","20"], correct:0 },
+    { q:"متوسط العددين 10 و20 هو:", options:["15","10","20","30"], correct:0 },
     { q:"إذا كان س² − 5س + 6 = 0، فإن قيمتي س هما:", options:["2 , 3","1 , 6","−2 , −3","5 , 6"], correct:0 }
   ]},
   english: { label:"English", items:[
@@ -489,6 +570,14 @@ const QUESTION_BANK = {
     { q:"\"If I ___ rich, I would travel the world.\"", options:["were","was","am","be"], correct:0 },
     { q:"Which of the following is a noun?", options:["happiness","quickly","beautiful","run"], correct:0 },
     { q:"Choose the correct spelling:", options:["necessary","neccessary","necesary","neccesary"], correct:0 },
+    { q:"Choose the correct article: \"___ apple a day keeps the doctor away.\"", options:["An","A","The","No article"], correct:0 },
+    { q:"The superlative form of \"good\" is:", options:["best","gooder","more good","goodest"], correct:0 },
+    { q:"Which word means the same as \"begin\"?", options:["start","end","stop","finish"], correct:0 },
+    { q:"Choose the correct sentence:", options:["She has been studying for two hours.","She has being studying for two hours.","She have been studying for two hours.","She has been study for two hours."], correct:0 },
+    { q:"The word \"quickly\" is a/an:", options:["adverb","adjective","noun","verb"], correct:0 },
+    { q:"Choose the correct past participle of \"go\":", options:["gone","went","going","goed"], correct:0 },
+    { q:"\"Neither of the students ___ present.\"", options:["is","are","were","have"], correct:0 },
+    { q:"Choose the correct indirect question: \"Could you tell me ___?\"", options:["where the station is","where is the station","where the station was is","where does the station is"], correct:0 },
     { q:"Which sentence uses the third conditional correctly?", options:["If I had studied, I would have passed.","If I study, I would have passed.","If I had studied, I will pass.","If I studied, I would have pass."], correct:0 }
   ]}
 };
@@ -503,7 +592,13 @@ QUESTION_BANK.programming = { label:"برمجة", items:[
   { q:"أي رمز يُستخدم للتعليقات في JavaScript على سطر واحد؟", options:["//","<!-- -->","#","**"], correct:0 },
   { q:"ما هو المتغيّر (Variable) في البرمجة؟", options:["مكان لتخزين قيمة يمكن تغييرها","صورة ثابتة","لون الخلفية","اسم الموقع"], correct:0 },
   { q:"أي مما يلي يُعتبر لغة ترميز (Markup) وليس لغة برمجة؟", options:["HTML","Python","Java","C++"], correct:0 },
-  { q:"خوارزمية الفرز (Sorting) تُستخدم من أجل:", options:["ترتيب مجموعة من العناصر","حذف البيانات","تلوين الصفحة","تشغيل الصوت"], correct:0 }
+  { q:"خوارزمية الفرز (Sorting) تُستخدم من أجل:", options:["ترتيب مجموعة من العناصر","حذف البيانات","تلوين الصفحة","تشغيل الصوت"], correct:0 },
+  { q:"أي مما يلي مثال على متغيّر منطقي (Boolean)؟", options:["true / false","اسم المستخدم","رقم الهاتف","لون الخلفية"], correct:0 },
+  { q:"ما وظيفة حلقة for في البرمجة؟", options:["تكرار كود عدد محدد من المرات","تخزين نص فقط","رسم الأشكال فقط","تشغيل الموسيقى"], correct:0 },
+  { q:"ما اسم قاعدة البيانات التي تخزن البيانات في صفوف وأعمدة؟", options:["قاعدة بيانات علائقية (SQL)","صورة","فيديو","ملف نصي فقط"], correct:0 },
+  { q:"أي امتداد ملف يُستخدم لملفات جافاسكريبت؟", options:[".js",".css",".html",".png"], correct:0 },
+  { q:"ما معنى الاختصار API؟", options:["Application Programming Interface","Automatic Program Installer","Applied Programming Instruction","Advanced Page Index"], correct:0 },
+  { q:"ما هي وظيفة الشرط (if) في البرمجة؟", options:["تنفيذ كود معيّن إذا تحقق شرط معيّن","تكرار الكود دائماً","إيقاف البرنامج فوراً","لا شيء مما سبق"], correct:0 }
 ]};
 QUESTION_BANK.ai = { label:"ذكاء اصطناعي", items:[
   { q:"الذكاء الاصطناعي (AI) هو مجال يهتم بـ:", options:["جعل الآلات تحاكي التفكير البشري","تصنيع الأجهزة الكهربائية فقط","طباعة الكتب","رسم الصور اليدوية"], correct:0 },
@@ -512,7 +607,12 @@ QUESTION_BANK.ai = { label:"ذكاء اصطناعي", items:[
   { q:"ما المقصود بالبيانات التدريبية (Training Data)؟", options:["البيانات التي يتعلّم منها النظام الذكي","كلمة المرور","اسم المستخدم","نوع الجهاز"], correct:0 },
   { q:"الشبكات العصبية الاصطناعية (Neural Networks) مستوحاة من:", options:["طريقة عمل الدماغ البشري","حركة الكواكب","الدورة الدموية","طبقات الغلاف الجوي"], correct:0 },
   { q:"هل الذكاء الاصطناعي يعني بالضرورة أن الآلة تفكر وتشعر كالإنسان؟", options:["لا، هو محاكاة لأنماط بلا شعور حقيقي","نعم دائماً","نعم في كل الحالات","لا علاقة له بالتفكير إطلاقاً"], correct:0 },
-  { q:"من أبرز استخدامات الذكاء الاصطناعي اليوم:", options:["التعرف على الصور والترجمة الآلية","صناعة الورق فقط","الزراعة اليدوية","الطبخ التقليدي"], correct:0 }
+  { q:"من أبرز استخدامات الذكاء الاصطناعي اليوم:", options:["التعرف على الصور والترجمة الآلية","صناعة الورق فقط","الزراعة اليدوية","الطبخ التقليدي"], correct:0 },
+  { q:"من أشهر تطبيقات الذكاء الاصطناعي في الترجمة الفورية:", options:["Google Translate","Photoshop","Excel","Windows Media Player"], correct:0 },
+  { q:"الذكاء الاصطناعي التوليدي (Generative AI) يُستخدم لـ:", options:["توليد نصوص وصور جديدة","حذف الملفات فقط","تسريع الإنترنت فقط","لا شيء مما سبق"], correct:0 },
+  { q:"الروبوتات الذكية تعتمد على:", options:["أجهزة استشعار وبرمجيات ذكاء اصطناعي","الحظ فقط","الكهرباء فقط بدون برمجة","لا شيء"], correct:0 },
+  { q:"من مخاطر الاعتماد الكامل على الذكاء الاصطناعي دون تفكير نقدي:", options:["تصديق معلومات خاطئة دون تحقق","زيادة الذكاء تلقائياً","إلغاء الحاجة للتعلم نهائياً وبأمان","لا توجد مخاطر إطلاقاً"], correct:0 },
+  { q:"الفرق بين الذكاء الاصطناعي الضيق والعام:", options:["الضيق متخصص في مهمة واحدة، والعام يحاكي الذكاء البشري الشامل","لا فرق بينهما","العام أبطأ من الضيق فقط","الضيق أذكى من العام دائماً"], correct:0 }
 ]};
 QUESTION_BANK.islamic = { label:"تربية إسلامية", items:[
   { q:"كم عدد أركان الإسلام؟", options:["خمسة","أربعة","ستة","سبعة"], correct:0 },
@@ -522,7 +622,12 @@ QUESTION_BANK.islamic = { label:"تربية إسلامية", items:[
   { q:"ما اسم أول سورة نزلت من القرآن الكريم؟", options:["سورة العلق","سورة الفاتحة","سورة البقرة","سورة الإخلاص"], correct:0 },
   { q:"الزكاة تجب في المال إذا بلغ:", options:["النصاب وحال عليه الحول","أي مبلغ مهما كان صغيراً","مرة واحدة في العمر فقط","لا تجب أبداً"], correct:0 },
   { q:"الحج فريضة على كل مسلم مستطيع كم مرة في العمر؟", options:["مرة واحدة","كل عام","مرتين","لا يجب أبداً"], correct:0 },
-  { q:"هل صيام رمضان واجب على كل مسلم بلا أي استثناء؟", options:["لا، هناك أعذار شرعية تبيح الإفطار كالمرض والسفر","نعم لا استثناء أبداً","فقط على الرجال","فقط في بعض الدول"], correct:0 }
+  { q:"هل صيام رمضان واجب على كل مسلم بلا أي استثناء؟", options:["لا، هناك أعذار شرعية تبيح الإفطار كالمرض والسفر","نعم لا استثناء أبداً","فقط على الرجال","فقط في بعض الدول"], correct:0 },
+  { q:"من الكتب السماوية المذكورة في القرآن الكريم:", options:["التوراة والإنجيل والزبور والقرآن","التوراة فقط","الإنجيل فقط","لا شيء مما سبق"], correct:0 },
+  { q:"عدد أنبياء أولي العزم من الرسل:", options:["خمسة","ثلاثة","سبعة","عشرة"], correct:0 },
+  { q:"غزوة بدر الكبرى وقعت في السنة الهجرية:", options:["الثانية","الأولى","الخامسة","العاشرة"], correct:0 },
+  { q:"من آداب الإسلام في التعامل مع الوالدين:", options:["البر بهما وخفض الجناح لهما","العقوق","الإهمال","لا شيء مما سبق"], correct:0 },
+  { q:"صلاة الجماعة في المسجد للرجال حكمها:", options:["مؤكدة وفضلها عظيم","محرمة","مكروهة","لا قيمة لها"], correct:0 }
 ]};
 QUESTION_BANK.culture = { label:"ثقافة عامة", items:[
   { q:"ما هو أطول نهر في العالم؟", options:["نهر النيل","نهر الأمازون","نهر الفرات","نهر دجلة"], correct:0 },
@@ -531,11 +636,21 @@ QUESTION_BANK.culture = { label:"ثقافة عامة", items:[
   { q:"من يُنسب إليه اختراع المصباح الكهربائي؟", options:["توماس إديسون","نيوتن","أينشتاين","جراهام بيل"], correct:0 },
   { q:"ما أكبر محيط في العالم مساحةً؟", options:["المحيط الهادئ","المحيط الأطلسي","المحيط الهندي","المحيط المتجمد الشمالي"], correct:0 },
   { q:"أي الكواكب أقرب إلى الشمس؟", options:["عطارد","الزهرة","الأرض","المريخ"], correct:0 },
-  { q:"كم عدد أيام السنة الكبيسة؟", options:["366 يوماً","365 يوماً","364 يوماً","360 يوماً"], correct:0 }
+  { q:"كم عدد أيام السنة الكبيسة؟", options:["366 يوماً","365 يوماً","364 يوماً","360 يوماً"], correct:0 },
+  { q:"أكبر جزيرة في العالم:", options:["جرينلاند","مدغشقر","بورنيو","أيسلندا"], correct:0 },
+  { q:"اللغة الأكثر انتشاراً في العالم من حيث عدد المتحدثين الأصليين:", options:["الصينية الماندرين","الإنجليزية","الإسبانية","العربية"], correct:0 },
+  { q:"أول رائد فضاء وصل إلى القمر:", options:["نيل أرمسترونج","يوري جاجارين","باز ألدرين","الأمير سلطان"], correct:0 },
+  { q:"أعلى قمة جبلية في العالم:", options:["إفرست","كليمنجارو","الألب","أنديز"], correct:0 },
+  { q:"عدد ألوان قوس قزح:", options:["سبعة","خمسة","ستة","ثمانية"], correct:0 }
 ]};
 
 /* سؤال الفخ: يبدو طبيعياً تماماً، لكنه يُحتسب خطأ دائماً أياً كانت الإجابة */
-const TRAP_QUESTION = { q:"أي مما يلي هو العدد الأولي الوحيد الزوجي؟", options:["2","1","4","9"], correct:-1, isTrap:true };
+const TRAP_QUESTIONS = [
+  { q:"أي مما يلي هو العدد الأولي الوحيد الزوجي؟", options:["2","1","4","9"] },
+  { q:"كم عدد أيام شهر فبراير في السنة العادية (غير الكبيسة)؟", options:["28","29","30","31"] },
+  { q:"أي مما يلي ليس من الحواس الخمس التقليدية؟", options:["الحدس","اللمس","السمع","الشم"] },
+  { q:"ما ناتج قسمة أي عدد على صفر؟", options:["غير معرّف رياضياً","صفر","نفس العدد","واحد"] }
+];
 
 const PUNISH_QUESTIONS = [
   { q:"إذا كانت كل الوردات زهوراً، وبعض الزهور حمراء، فهل كل الورود حمراء بالضرورة؟", options:["لا، غير لازم منطقياً","نعم لازم","لا علاقة","مستحيل تحديدها"] },
@@ -586,13 +701,28 @@ function generateMathQuestion(difficulty){
 
 /* يسحب count سؤال من صعوبة معيّنة من البنك المُنسّق، ويكمل الباقي (لو البنك ما يكفيش)
    بأسئلة مولّدة تلقائياً — هذا ما يضمن عدم تكرار الامتحان أبداً مهما كان حجم البنك */
-function pickByDifficulty(pool, difficulty, count){
-  const candidates = realShuffle(pool.filter(p=>p.difficulty===difficulty));
-  const picked = candidates.slice(0,count).map(item=>{
+/* تتبّع الأسئلة اللي شافها هذا الجهاز من قبل — لضمان عدم التكرار فعلياً */
+const SEEN_QUESTIONS_KEY = 'quiz_seen_questions_v1';
+function getSeenSet(){
+  try{ return new Set(JSON.parse(localStorage.getItem(SEEN_QUESTIONS_KEY) || '[]')); }catch(e){ return new Set(); }
+}
+function markQuestionsSeen(questionTexts){
+  const seen = Array.from(getSeenSet());
+  const merged = [...seen, ...questionTexts];
+  localStorage.setItem(SEEN_QUESTIONS_KEY, JSON.stringify(merged.slice(-500)));
+}
+
+function pickByDifficulty(pool, difficulty, count, seenSet){
+  const candidates = pool.filter(p=>p.difficulty===difficulty);
+  /* الأولوية المطلقة للأسئلة اللي الجهاز ده لسه ما شافهاش أبداً */
+  const unseen = realShuffle(candidates.filter(c=>!seenSet.has(c.question)));
+  const picked = unseen.slice(0,count).map(item=>{
     const correctText = item.options[item.correct];
     const shuffledOptions = realShuffle(item.options);
     return { subjectKey:item.subjectKey, subjectLabel:item.subjectLabel, question:item.question, options:shuffledOptions, correctIndex: shuffledOptions.indexOf(correctText), isTrap:false, difficulty };
   });
+  /* لو البنك الثابت لهذه الصعوبة خلص كله، نكمل الباقي بأسئلة مولّدة تلقائياً (لا نهائية)
+     بدل ما نعيد سؤال شافه الطالب قبل كده */
   while(picked.length < count){ picked.push(generateMathQuestion(difficulty === 'trap' ? 'hard' : difficulty)); }
   return picked;
 }
@@ -606,15 +736,21 @@ function buildRandomQuiz(){
     });
   });
 
+  const seenSet = getSeenSet();
   /* نسبة ثابتة لكل امتحان: 17 سهل + 8 متوسط + 4 صعب جداً + سؤال فخ واحد = 30 */
   let quiz = [
-    ...pickByDifficulty(pool, 'easy', 17),
-    ...pickByDifficulty(pool, 'medium', 8),
-    ...pickByDifficulty(pool, 'hard', 4)
+    ...pickByDifficulty(pool, 'easy', 17, seenSet),
+    ...pickByDifficulty(pool, 'medium', 8, seenSet),
+    ...pickByDifficulty(pool, 'hard', 4, seenSet)
   ];
-  const trapOptions = realShuffle(TRAP_QUESTION.options);
-  quiz.push({ subjectKey:'science', subjectLabel:'ذكاء ومنطق', question:TRAP_QUESTION.q, options:trapOptions, correctIndex:-1, isTrap:true, difficulty:'trap' });
-  return realShuffle(quiz);
+  const trapPick = TRAP_QUESTIONS[Math.floor(Math.random()*TRAP_QUESTIONS.length)];
+  const trapOptions = realShuffle(trapPick.options);
+  quiz.push({ subjectKey:'science', subjectLabel:'ذكاء ومنطق', question:trapPick.q, options:trapOptions, correctIndex:-1, isTrap:true, difficulty:'trap' });
+
+  quiz = realShuffle(quiz);
+  /* نسجّل كل الأسئلة الثابتة (غير المولّدة والفخ) كمرئية على هذا الجهاز */
+  markQuestionsSeen(quiz.filter(q=>!q.isTrap && q.subjectKey!=='math-gen').map(q=>q.question));
+  return quiz;
 }
 
 /* ==================================================================
