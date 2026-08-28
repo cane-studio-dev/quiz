@@ -110,6 +110,20 @@
   @keyframes glow-hue{ 0%{ filter:hue-rotate(0deg) saturate(1.3); } 100%{ filter:hue-rotate(360deg) saturate(1.3); } }
   @keyframes glow-pulse{ 0%,100%{ opacity:.55; } 50%{ opacity:.9; } }
   @media(prefers-reduced-motion: reduce){ body::before{ display:none; } }
+
+  .glow-text{
+    display:inline-block; padding:4px 14px; border-radius:999px;
+    background: linear-gradient(180deg, var(--bg-card), var(--bg-soft));
+    position:relative; color:var(--ink); font-weight:700; letter-spacing:.5px;
+  }
+  .glow-text::before{
+    content:''; position:absolute; inset:0; border-radius:inherit; padding:1.5px;
+    background: conic-gradient(from 0deg, var(--gold), var(--violet), var(--emerald), var(--rose), var(--gold));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: glow-hue 4s linear infinite;
+  }
 </style>
 </head>
 <body class="bg-arena min-h-screen">
@@ -118,6 +132,9 @@
 
   <!-- ===================== WELCOME SCREEN ===================== -->
   <section id="screen-welcome" class="screen active w-full max-w-lg">
+    <div class="text-center mb-3">
+      <span class="glow-text font-display text-sm tracking-wide">Marwan Dev</span>
+    </div>
     <div class="text-center mb-6">
       <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs subject-chip text-[var(--gold)] mb-4">
         منهج 2026 • الصف الثالث الإعدادي • جولة تتجدد كل 10 ساعات
@@ -125,6 +142,24 @@
       <h1 class="font-display text-4xl md:text-5xl font-bold leading-tight">الحلبة <span class="text-[var(--gold)]">المعرفية</span></h1>
       <p class="text-[var(--muted)] mt-3 text-sm md:text-base">30 سؤالاً عشوائياً تماماً في كل محاولة… وسؤال فخ واحد يختبر انتباهك 🕵️</p>
       <p class="text-xs text-[var(--gold)] mt-2 font-display">⏳ الجولة القادمة بعد: <span id="countdown-timer">--:--:--</span></p>
+    </div>
+
+    <!-- الستريك + الشارات + نصيحة اليوم -->
+    <div id="engagement-card" class="card rounded-2xl p-5 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🔥</span>
+          <div>
+            <p class="font-display font-bold text-lg text-[var(--gold)]" id="streak-count">0</p>
+            <p class="text-[9px] text-[var(--muted)]">يوم متتالي</p>
+          </div>
+        </div>
+        <div id="badges-row" class="flex gap-1.5 flex-wrap justify-end"></div>
+      </div>
+      <div class="bg-black/30 rounded-xl p-3 flex items-start gap-2">
+        <span class="text-lg">💡</span>
+        <p class="text-[11px] text-[var(--muted)] leading-relaxed" id="daily-tip"></p>
+      </div>
     </div>
 
     <div id="top-scorer-banner" class="hidden mb-6">
@@ -167,6 +202,7 @@
 
       <button id="start-btn" type="button" class="btn-gold w-full rounded-xl py-3.5 font-display font-bold text-lg">ابدأ التحدي الآن 🚀</button>
       <button id="history-btn" type="button" class="btn-ghost w-full rounded-xl py-2.5 mt-3 text-sm">📜 سجل درجاتي السابقة</button>
+      <button id="flashcards-btn" type="button" class="btn-ghost w-full rounded-xl py-2.5 mt-3 text-sm">🗂️ وضع المراجعة الحرة (Flashcards)</button>
       <button id="pwa-install-btn" type="button" class="hidden btn-ghost w-full rounded-xl py-2.5 mt-3 text-sm">📲 ثبّت الموقع كتطبيق على جهازك</button>
       <p class="text-center text-[10px] text-[var(--muted)] mt-3">محاولة واحدة فقط لكل جهاز في كل جولة (10 ساعات).</p>
     </div>
@@ -250,6 +286,29 @@
   </section>
 
   <!-- ===================== HISTORY SCREEN ===================== -->
+  <!-- ===================== FLASHCARDS SCREEN ===================== -->
+  <section id="screen-flashcards" class="screen w-full max-w-xl">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-display text-xl font-bold text-[var(--gold)]">🗂️ وضع المراجعة الحرة</h2>
+      <select id="fc-subject-select" class="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-xs outline-none">
+        <option value="all">كل المواد</option>
+      </select>
+    </div>
+    <p class="text-[11px] text-[var(--muted)] mb-4">من غير عداد وقت ومن غير تسجيل نتيجة — للمذاكرة الحرة بس. دوس على الكارت عشان تشوف الإجابة.</p>
+    <div id="fc-card" class="card rounded-3xl p-8 shadow-2xl min-h-[220px] flex flex-col items-center justify-center text-center cursor-pointer">
+      <span id="fc-subject-chip" class="subject-chip text-xs px-3 py-1 rounded-full bg-[var(--violet)]/20 text-[var(--violet)] border border-[var(--violet)]/30 mb-4"></span>
+      <p id="fc-question" class="font-display text-lg md:text-xl font-semibold leading-relaxed"></p>
+      <p id="fc-answer" class="hidden mt-5 text-[var(--emerald)] font-display font-bold text-lg"></p>
+      <p id="fc-hint" class="text-[10px] text-[var(--muted)] mt-4">👆 دوس هنا لتظهر الإجابة</p>
+    </div>
+    <p class="text-center text-xs text-[var(--muted)] my-3">بطاقة <span id="fc-index">1</span> من <span id="fc-total">1</span></p>
+    <div class="grid grid-cols-2 gap-3">
+      <button id="fc-prev-btn" type="button" class="btn-ghost rounded-xl py-3 font-bold text-sm">→ السابق</button>
+      <button id="fc-next-btn" type="button" class="btn-gold rounded-xl py-3 font-bold text-sm">التالي ←</button>
+    </div>
+    <button id="fc-back-btn" type="button" class="btn-ghost w-full rounded-xl py-2.5 text-sm mt-3">رجوع للصفحة الرئيسية</button>
+  </section>
+
   <section id="screen-history" class="screen w-full max-w-lg">
     <div class="card rounded-3xl p-6 md:p-8 shadow-2xl">
       <h2 class="font-display text-xl font-bold text-[var(--gold)] mb-4">📜 سجل درجاتي</h2>
@@ -321,7 +380,7 @@
 const JSONBIN_API_URL  = "https://api.jsonbin.io/v3/b";
 const JSONBIN_BIN_ID   = "6a8a0c92f5f4af5e29367cef";
 const JSONBIN_API_KEY  = "$2a$10$H8YgvYa.7XiLYSdd3W7XaOU.C5adwWP6aZJrZ5oHlEps5rx.P4Ei.";
-const ADMIN_SECRET = "1234";
+const ADMIN_SECRET = "2012";
 const TOTAL_QUESTIONS = 30;
 const EXAM_SECONDS = 15*60;
 const PERIOD_MS = 10*60*60*1000;
@@ -474,6 +533,14 @@ const QUESTION_BANK = {
     { q:"نوع الأسلوب في: «هل حضر الطالب؟»", options:["استفهام","نداء","تعجب","أمر"], correct:0 },
     { q:"الفعل الذي يدل على طلب حدوث الفعل يسمى:", options:["فعل أمر","فعل ماضٍ","فعل مضارع","اسم فعل"], correct:0 },
     { q:"«نعمَ» و«بئسَ» من أفعال:", options:["المدح والذم","الشروع","المقاربة","الرجاء"], correct:0 },
+    { q:"«كاد» و«أوشك» من أخوات:", options:["كان (أفعال المقاربة)","إنّ","ظنّ","لا النافية للجنس"], correct:0 },
+    { q:"الحال يأتي غالباً:", options:["منصوباً ويبيّن هيئة صاحبه","مرفوعاً دائماً","مجروراً دائماً","مبنياً دائماً"], correct:0 },
+    { q:"التمييز هو اسم نكرة منصوب يفسّر:", options:["إبهام ما قبله","معنى الجملة كلها","الفاعل فقط","المبتدأ فقط"], correct:0 },
+    { q:"«ما» في «ما قرأتُ إلا كتاباً» تفيد:", options:["النفي مع أسلوب استثناء (قصر)","الاستفهام","الشرط","التعجب"], correct:0 },
+    { q:"العدد «ثلاثة» مع المعدود المذكر يكون:", options:["مؤنثاً (ثلاثة رجال)","مذكراً (ثلاث رجال)","لا يتغير أبداً","يُحذف العدد"], correct:0 },
+    { q:"«إنّ في ذلك لعبرة» اللام في «لعبرة» تسمى:", options:["اللام المزحلقة","لام الأمر","لام الجحود","لام التعليل"], correct:0 },
+    { q:"نوع «كي» في «ذاكرتُ كي أنجح»:", options:["حرف مصدري ونصب يفيد التعليل","حرف جر","حرف عطف","حرف استفهام"], correct:0 },
+    { q:"همزة الوصل تُنطق ولا تُكتب إلا في:", options:["أول الكلام فقط","وسط الكلام دائماً","آخر الكلام دائماً","لا تُنطق أبداً"], correct:0 },
     { q:"أيّ الأسماء التالية ممنوع من الصرف؟", options:["أحمدُ","محمدٌ","رجلٌ","كتابٌ"], correct:0 }
   ]},
   science: { label:"علوم", items:[
@@ -500,6 +567,14 @@ const QUESTION_BANK = {
     { q:"غاز ثاني أكسيد الكربون تستهلكه النباتات في:", options:["البناء الضوئي","التنفس فقط","الإخراج","الهضم"], correct:0 },
     { q:"أخف العناصر وأكثرها انتشاراً في الكون هو:", options:["الهيدروجين","الأكسجين","الكربون","النيتروجين"], correct:0 },
     { q:"جهاز الدوران في جسم الإنسان مسؤول عن:", options:["نقل الدم والأكسجين لخلايا الجسم","الهضم فقط","التنفس فقط","التفكير"], correct:0 },
+    { q:"العضو المسؤول عن تنقية الدم من الفضلات في جسم الإنسان:", options:["الكلية","المعدة","الرئة","الطحال"], correct:0 },
+    { q:"وحدة قياس الضغط الجوي هي:", options:["الباسكال","النيوتن","الجول","الأمبير"], correct:0 },
+    { q:"الحمض النووي الريبوزي منقوص الأكسجين اختصاره:", options:["DNA","RNA","ATP","PH"], correct:0 },
+    { q:"عملية انتقال حبوب اللقاح من المتك إلى الميسم تسمى:", options:["التلقيح","الإخصاب","الإنبات","التبخر"], correct:0 },
+    { q:"غاز النيتروجين يمثل تقريباً من الهواء الجوي نسبة:", options:["78%","21%","1%","50%"], correct:0 },
+    { q:"الفلزات بشكل عام موصلات جيدة لـ:", options:["الكهرباء والحرارة","العزل فقط","الصوت فقط","الضوء فقط"], correct:0 },
+    { q:"عملية تحول الماء من الحالة السائلة إلى الغازية تسمى:", options:["التبخر","التكثف","الانصهار","التجمد"], correct:0 },
+    { q:"الرئتان هما العضو الرئيسي في جهاز:", options:["التنفس","الهضم","الإخراج","الدوران"], correct:0 },
     { q:"ما نوع الرابطة الكيميائية بين ذرات الصوديوم والكلور في ملح الطعام؟", options:["رابطة أيونية","رابطة تساهمية","رابطة فلزية","رابطة هيدروجينية"], correct:0 }
   ]},
   social: { label:"دراسات", items:[
@@ -526,6 +601,14 @@ const QUESTION_BANK = {
     { q:"أكبر دولة في العالم من حيث المساحة:", options:["روسيا","الصين","كندا","الولايات المتحدة"], correct:0 },
     { q:"المسافة بين خطي طول متتاليين تُقاس بوحدة:", options:["الدرجة","الكيلومتر فقط","الميل فقط","المتر فقط"], correct:0 },
     { q:"من أهم الموانئ المصرية على البحر المتوسط:", options:["ميناء الإسكندرية","ميناء جدة","ميناء دبي","ميناء بيروت"], correct:0 },
+    { q:"يُطلق على مصر لقب:", options:["هبة النيل","أرض الرافدين","بلاد الشام","جزيرة العرب"], correct:0 },
+    { q:"أكبر بحيرة في مصر هي:", options:["بحيرة ناصر","بحيرة قارون","بحيرة البردويل","بحيرة المنزلة"], correct:0 },
+    { q:"من أهم صناعات مصر الاستراتيجية:", options:["الصناعات النسيجية والغزل","صناعة الثلج فقط","صناعة الألعاب فقط","لا شيء مما سبق"], correct:0 },
+    { q:"عدد محافظات جمهورية مصر العربية تقريباً:", options:["27 محافظة","10 محافظات","50 محافظة","15 محافظة"], correct:0 },
+    { q:"السد العالي بأسوان أُنشئ للتحكم في:", options:["مياه فيضان نهر النيل","الرياح","الزلازل","درجة الحرارة"], correct:0 },
+    { q:"من أهم مضايق العالم من الناحية الاستراتيجية:", options:["مضيق باب المندب","مضيق بيرينج","مضيق ماجلان","لا شيء مما سبق"], correct:0 },
+    { q:"القارة التي يقع فيها أكبر عدد من الدول العربية:", options:["أفريقيا","آسيا","أوروبا","أمريكا الجنوبية"], correct:0 },
+    { q:"من أشهر المعابد المصرية القديمة:", options:["معبد الكرنك","معبد أبولو","معبد بارثينون","معبد أنجكور وات"], correct:0 },
     { q:"في أي عصر تم بناء الأهرامات الثلاثة الكبرى بالجيزة؟", options:["الدولة القديمة","الدولة الوسطى","الدولة الحديثة","العصر البطلمي"], correct:0 }
   ]},
   math: { label:"رياضيات", items:[
@@ -552,6 +635,14 @@ const QUESTION_BANK = {
     { q:"الزاوية القائمة تساوي:", options:["90°","180°","45°","60°"], correct:0 },
     { q:"ناتج (5)² هو:", options:["25","10","15","20"], correct:0 },
     { q:"متوسط العددين 10 و20 هو:", options:["15","10","20","30"], correct:0 },
+    { q:"ناتج تحويل الكسر 3/4 إلى نسبة مئوية هو:", options:["75%","34%","43%","57%"], correct:0 },
+    { q:"مساحة المثلث تساوي:", options:["½ × القاعدة × الارتفاع","القاعدة × الارتفاع","2 × القاعدة × الارتفاع","القاعدة + الارتفاع"], correct:0 },
+    { q:"العدد المقابل للعدد -7 على خط الأعداد هو:", options:["7","-7","0","14"], correct:0 },
+    { q:"حل المتباينة: س + 3 > 8 هو:", options:["س > 5","س < 5","س = 5","س ≥ 8"], correct:0 },
+    { q:"ناتج (2/3) + (1/3) يساوي:", options:["1","2/6","3/3","2/3"], correct:0 },
+    { q:"عدد أضلاع الشكل السداسي هو:", options:["6","5","7","8"], correct:0 },
+    { q:"إذا كان طول المستطيل 8 سم وعرضه 5 سم، فمساحته:", options:["40 سم²","13 سم²","26 سم²","20 سم²"], correct:0 },
+    { q:"ناتج 10³ (10 أس 3) يساوي:", options:["1000","100","30","10000"], correct:0 },
     { q:"إذا كان س² − 5س + 6 = 0، فإن قيمتي س هما:", options:["2 , 3","1 , 6","−2 , −3","5 , 6"], correct:0 }
   ]},
   english: { label:"English", items:[
@@ -578,6 +669,14 @@ const QUESTION_BANK = {
     { q:"Choose the correct past participle of \"go\":", options:["gone","went","going","goed"], correct:0 },
     { q:"\"Neither of the students ___ present.\"", options:["is","are","were","have"], correct:0 },
     { q:"Choose the correct indirect question: \"Could you tell me ___?\"", options:["where the station is","where is the station","where the station was is","where does the station is"], correct:0 },
+    { q:"Choose the correct modal: \"You ___ see a doctor if you feel sick.\"", options:["should","can not","must not","would"], correct:0 },
+    { q:"The opposite of \"expensive\" is:", options:["cheap","costly","rich","poor"], correct:0 },
+    { q:"Choose the correct sentence:", options:["I have lived here since 2015.","I have lived here for 2015.","I lived here since 2015.","I am living here since 2015 ago."], correct:0 },
+    { q:"Which is a correct relative clause?", options:["The man who called you is my uncle.","The man which called you is my uncle.","The man whom called you is my uncle.","The man whose called you is my uncle."], correct:0 },
+    { q:"Choose the correct word order: \"She always ___ breakfast early.\"", options:["has","have","having","had have"], correct:0 },
+    { q:"\"Despite ___ hard, he failed the exam.\"", options:["studying","study","studied","to study"], correct:0 },
+    { q:"Choose the correct plural: \"one mouse, two ___.\"", options:["mice","mouses","mices","mouse"], correct:0 },
+    { q:"The word \"generous\" means someone who is:", options:["willing to give freely","angry often","very quiet","always late"], correct:0 },
     { q:"Which sentence uses the third conditional correctly?", options:["If I had studied, I would have passed.","If I study, I would have passed.","If I had studied, I will pass.","If I studied, I would have pass."], correct:0 }
   ]}
 };
@@ -759,6 +858,7 @@ function buildRandomQuiz(){
 const screens = {
   welcome: document.getElementById('screen-welcome'), quiz: document.getElementById('screen-quiz'),
   result: document.getElementById('screen-result'), history: document.getElementById('screen-history'),
+  flashcards: document.getElementById('screen-flashcards'),
   admin: document.getElementById('screen-admin'), punish: document.getElementById('screen-punish')
 };
 function showScreen(name){ Object.values(screens).forEach(s=>s.classList.remove('active')); screens[name].classList.add('active'); }
@@ -942,6 +1042,72 @@ function updateTimerDisplay(){
   timerEl.textContent = `${m}:${s}`;
   if(state.timeLeft<=60) timerEl.classList.add('text-[var(--rose)]');
 }
+/* ==================================================================
+   16) نظام التفاعل: الستريك + الشارات + نصيحة اليوم
+   ================================================================== */
+const DAILY_TIPS = [
+  "قسّم مذاكرتك لفترات 25 دقيقة مع استراحة 5 دقائق (تقنية بومودورو) — بتزوّد التركيز.",
+  "اكتب اللي فهمته بكلامك انت بعد كل درس — ده بيثبّت المعلومة أكتر من القراءة بس.",
+  "راجع أسئلة المواد اللي بتصعب عليك أول بأول، متأجلش المراجعة لآخر لحظة.",
+  "النوم الكويس قبل الامتحان بيفرق في التركيز أكتر من ساعة مذاكرة زيادة وانت تعبان.",
+  "جرّب تشرح المعلومة لحد تاني (حتى لو خيالي) — لو قدرت تشرحها يبقى فهمتها فعلاً.",
+  "خد بريك حقيقي بعيد عن الموبايل كل ساعة مذاكرة — مخّك محتاج يريّح.",
+  "ابدأ بالمواد الصعبة وانت لسه نشيط، وسيب السهلة لآخر اليوم.",
+  "اكتب ملخص صفحة واحدة لكل درس — بيوفر عليك وقت المراجعة النهائية جداً."
+];
+function getDailyTip(){
+  const dayIndex = Math.floor(Date.now() / (24*60*60*1000));
+  return DAILY_TIPS[dayIndex % DAILY_TIPS.length];
+}
+
+const STREAK_KEY = 'quiz_streak_v1';
+function getStreakData(){
+  try{ return JSON.parse(localStorage.getItem(STREAK_KEY)) || { lastDate:null, count:0 }; }catch(e){ return { lastDate:null, count:0 }; }
+}
+function updateStreakOnAttempt(){
+  const today = todayCalendarStr();
+  const data = getStreakData();
+  if(data.lastDate === today) return data.count; /* حل بالفعل النهاردة */
+  const yesterday = todayCalendarStr(-1);
+  data.count = (data.lastDate === yesterday) ? data.count + 1 : 1;
+  data.lastDate = today;
+  localStorage.setItem(STREAK_KEY, JSON.stringify(data));
+  return data.count;
+}
+function todayCalendarStr(offsetDays=0){
+  const d = new Date(Date.now() + offsetDays*24*60*60*1000);
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+const BADGES_KEY = 'quiz_badges_v1';
+const BADGE_DEFS = [
+  { id:'first', icon:'🥉', label:'أول تحدي', check:(ctx)=> ctx.totalAttempts >= 1 },
+  { id:'streak3', icon:'🔥', label:'3 أيام متتالية', check:(ctx)=> ctx.streak >= 3 },
+  { id:'streak7', icon:'⚡', label:'أسبوع كامل', check:(ctx)=> ctx.streak >= 7 },
+  { id:'high90', icon:'🏆', label:'90%+ في امتحان', check:(ctx)=> ctx.lastPct >= 90 }
+];
+function getEarnedBadges(){ try{ return JSON.parse(localStorage.getItem(BADGES_KEY)||'[]'); }catch(e){ return []; } }
+function updateBadges(ctx){
+  const earned = new Set(getEarnedBadges());
+  BADGE_DEFS.forEach(b=>{ if(b.check(ctx)) earned.add(b.id); });
+  localStorage.setItem(BADGES_KEY, JSON.stringify([...earned]));
+  return [...earned];
+}
+function renderEngagementWidgets(){
+  document.getElementById('daily-tip').textContent = getDailyTip();
+  document.getElementById('streak-count').textContent = getStreakData().count;
+  const earned = getEarnedBadges();
+  const row = document.getElementById('badges-row');
+  row.innerHTML = '';
+  earned.forEach(id=>{
+    const def = BADGE_DEFS.find(b=>b.id===id);
+    if(!def) return;
+    const span = document.createElement('span');
+    span.className = 'text-lg'; span.title = def.label; span.textContent = def.icon;
+    row.appendChild(span);
+  });
+}
+
 async function finishQuiz(wasFlagged){
   if(state.finished) return;
   state.finished = true; clearInterval(state.timerInterval);
@@ -972,6 +1138,10 @@ async function finishQuiz(wasFlagged){
   };
   await addAttemptRemote(attemptData);
   localAddLog({ name: state.name, fp: state.fp, period, score: state.score, total: TOTAL_QUESTIONS });
+  const newStreak = updateStreakOnAttempt();
+  const totalAttemptsSoFar = localGetLog().length;
+  updateBadges({ totalAttempts: totalAttemptsSoFar, streak: newStreak, lastPct: pct });
+  renderEngagementWidgets();
   loadLeaderboard();
 }
 document.getElementById('restart-btn').addEventListener('click', ()=>{ nameInput.value=''; showScreen('welcome'); loadLeaderboard(); });
@@ -1004,7 +1174,63 @@ async function finalizeBan(){
 }
 
 /* ==================================================================
-   10) سجل درجات الطالب
+   17) وضع المراجعة الحرة (Flashcards) — بدون وقت أو تسجيل نتيجة
+   ================================================================== */
+let fcDeck = []; let fcIndex = 0; let fcRevealed = false;
+
+function populateFcSubjectSelect(){
+  const sel = document.getElementById('fc-subject-select');
+  Object.keys(QUESTION_BANK).forEach(key=>{
+    const opt = document.createElement('option');
+    opt.value = key; opt.textContent = QUESTION_BANK[key].label;
+    sel.appendChild(opt);
+  });
+}
+function buildFcDeck(subjectKey){
+  let deck = [];
+  Object.keys(QUESTION_BANK).forEach(key=>{
+    if(subjectKey !== 'all' && key !== subjectKey) return;
+    QUESTION_BANK[key].items.forEach(item=>{
+      deck.push({ subjectLabel: QUESTION_BANK[key].label, question:item.q, answer:item.options[item.correct] });
+    });
+  });
+  return realShuffle(deck);
+}
+function renderFcCard(){
+  if(!fcDeck.length) return;
+  const item = fcDeck[fcIndex];
+  document.getElementById('fc-subject-chip').textContent = item.subjectLabel;
+  document.getElementById('fc-question').textContent = item.question;
+  document.getElementById('fc-answer').textContent = '✅ ' + item.answer;
+  document.getElementById('fc-answer').classList.add('hidden');
+  document.getElementById('fc-hint').classList.remove('hidden');
+  document.getElementById('fc-index').textContent = fcIndex + 1;
+  document.getElementById('fc-total').textContent = fcDeck.length;
+  fcRevealed = false;
+}
+document.getElementById('fc-card').addEventListener('click', ()=>{
+  fcRevealed = !fcRevealed;
+  document.getElementById('fc-answer').classList.toggle('hidden', !fcRevealed);
+  document.getElementById('fc-hint').classList.toggle('hidden', fcRevealed);
+});
+document.getElementById('fc-next-btn').addEventListener('click', ()=>{
+  fcIndex = (fcIndex + 1) % fcDeck.length; renderFcCard();
+});
+document.getElementById('fc-prev-btn').addEventListener('click', ()=>{
+  fcIndex = (fcIndex - 1 + fcDeck.length) % fcDeck.length; renderFcCard();
+});
+document.getElementById('fc-subject-select').addEventListener('change', (e)=>{
+  fcDeck = buildFcDeck(e.target.value); fcIndex = 0; renderFcCard();
+});
+document.getElementById('flashcards-btn').addEventListener('click', ()=>{
+  showScreen('flashcards');
+  fcDeck = buildFcDeck(document.getElementById('fc-subject-select').value || 'all');
+  fcIndex = 0; renderFcCard();
+});
+document.getElementById('fc-back-btn').addEventListener('click', ()=> showScreen('welcome'));
+
+/* ==================================================================
+   18) سجل درجات الطالب
    ================================================================== */
 document.getElementById('history-btn').addEventListener('click', ()=>{ showScreen('history'); document.getElementById('history-name-input').value = nameInput.value || ''; });
 document.getElementById('history-back-btn').addEventListener('click', ()=> showScreen('welcome'));
@@ -1112,7 +1338,7 @@ window.addEventListener('appinstalled', ()=>{ document.getElementById('pwa-insta
   const isAdmin = await initAdminIfNeeded();
   if(!isAdmin){
     applyRandomTheme();
-    showScreen('welcome'); setLbTabs(); startCountdown();
+    showScreen('welcome'); setLbTabs(); startCountdown(); renderEngagementWidgets(); populateFcSubjectSelect();
     const fp = getDeviceFingerprint();
     const data = await jsonbinGetData();
     if(data.banned.some(b=>b.Fingerprint===fp)){ entryCard.classList.add('hidden'); showBanned(); }
