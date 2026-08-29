@@ -331,7 +331,7 @@
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-black/30 text-[var(--muted)] text-xs">
-            <tr><th class="p-3 text-right">#</th><th class="p-3 text-right">الاسم</th><th class="p-3 text-right">الدرجة</th><th class="p-3 text-right">الموقع التقريبي</th><th class="p-3 text-right">الجولة</th><th class="p-3 text-right">وقت الحل</th><th class="p-3 text-right">الحالة</th></tr>
+            <tr><th class="p-3 text-right">#</th><th class="p-3 text-right">الاسم</th><th class="p-3 text-right">الدرجة</th><th class="p-3 text-right">الموقع التقريبي</th><th class="p-3 text-right">الجولة</th><th class="p-3 text-right">وقت الحل</th><th class="p-3 text-right">الحالة</th><th class="p-3 text-right">إجراءات</th></tr>
           </thead>
           <tbody id="admin-table-body"></tbody>
         </table>
@@ -342,7 +342,7 @@
     <div class="card rounded-2xl overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead class="bg-black/30 text-[var(--muted)] text-xs"><tr><th class="p-3 text-right">#</th><th class="p-3 text-right">الاسم المستخدم</th><th class="p-3 text-right">وقت الحظر</th></tr></thead>
+          <thead class="bg-black/30 text-[var(--muted)] text-xs"><tr><th class="p-3 text-right">#</th><th class="p-3 text-right">الاسم المستخدم</th><th class="p-3 text-right">وقت الحظر</th><th class="p-3 text-right">إجراءات</th></tr></thead>
           <tbody id="banned-table-body"></tbody>
         </table>
       </div>
@@ -1288,6 +1288,30 @@ async function initAdminIfNeeded(){
   if(params.get('admin') === ADMIN_SECRET){ showScreen('admin'); await loadAdminTable(); document.getElementById('admin-refresh').addEventListener('click', loadAdminTable); return true; }
   return false;
 }
+async function adminBanFingerprint(fp, name){
+  if(!confirm(`متأكد إنك عايز تحظر جهاز "${name}"؟`)) return;
+  const data = await jsonbinGetData();
+  if(!data.banned.some(b=>b.Fingerprint===fp)) data.banned.push({ Fingerprint: fp, Name: name, Timestamp: new Date().toISOString() });
+  await jsonbinSaveData(data);
+  loadAdminTable();
+}
+async function adminUnbanFingerprint(fp){
+  if(!confirm('متأكد إنك عايز تفك الحظر عن الجهاز ده؟')) return;
+  const data = await jsonbinGetData();
+  data.banned = data.banned.filter(b=>b.Fingerprint!==fp);
+  await jsonbinSaveData(data);
+  loadAdminTable();
+}
+async function adminDeleteAttempt(index){
+  if(!confirm('متأكد إنك عايز تحذف المحاولة دي نهائياً؟')) return;
+  const data = await jsonbinGetData();
+  const sorted = data.attempts.slice().sort((a,b)=> b.Period - a.Period || b.Score - a.Score);
+  const target = sorted[index];
+  data.attempts = data.attempts.filter(a => a.Timestamp !== target.Timestamp || a.Fingerprint !== target.Fingerprint);
+  await jsonbinSaveData(data);
+  loadAdminTable();
+}
+
 async function loadAdminTable(){
   const tbody = document.getElementById('admin-table-body'); const emptyMsg = document.getElementById('admin-empty');
   const bannedBody = document.getElementById('banned-table-body');
@@ -1296,16 +1320,25 @@ async function loadAdminTable(){
   const rows = data.attempts.slice().sort((a,b)=> b.Period - a.Period || b.Score - a.Score);
   if(!rows.length){ emptyMsg.classList.remove('hidden'); } else {
     emptyMsg.classList.add('hidden'); let i=1;
-    rows.forEach(d=>{
+    rows.forEach((d,idx)=>{
       const statusBadge = d.Flagged ? `<span class="text-[var(--rose)]">مُلغى</span>` : `<span class="text-[var(--emerald)]">مكتمل</span>`;
+      const isBanned = data.banned.some(b=>b.Fingerprint===d.Fingerprint);
       const tr = document.createElement('tr'); tr.className='border-t border-white/5';
-      tr.innerHTML = `<td class="p-3 text-[var(--muted)]">${i++}</td><td class="p-3 font-semibold">${d.Name||'—'}</td><td class="p-3">${d.Score}/${d.Total}</td><td class="p-3 text-[var(--muted)] text-xs">${d.Location||'—'}</td><td class="p-3 text-[var(--muted)] text-xs">#${d.Period}</td><td class="p-3 text-[var(--muted)] text-xs">${fmtDuration(d.DurationSeconds||0)}</td><td class="p-3 text-xs">${statusBadge}</td>`;
+      tr.innerHTML = `<td class="p-3 text-[var(--muted)]">${i++}</td><td class="p-3 font-semibold">${d.Name||'—'}</td><td class="p-3">${d.Score}/${d.Total}</td><td class="p-3 text-[var(--muted)] text-xs">${d.Location||'—'}</td><td class="p-3 text-[var(--muted)] text-xs">#${d.Period}</td><td class="p-3 text-[var(--muted)] text-xs">${fmtDuration(d.DurationSeconds||0)}</td><td class="p-3 text-xs">${statusBadge}</td>
+        <td class="p-3 text-xs whitespace-nowrap">
+          <button class="admin-ban-btn text-[var(--rose)] underline ml-2" ${isBanned?'disabled':''}>${isBanned?'محظور':'حظر'}</button>
+          <button class="admin-del-btn text-[var(--muted)] underline">حذف</button>
+        </td>`;
+      tr.querySelector('.admin-ban-btn').addEventListener('click', ()=> adminBanFingerprint(d.Fingerprint, d.Name));
+      tr.querySelector('.admin-del-btn').addEventListener('click', ()=> adminDeleteAttempt(idx));
       tbody.appendChild(tr);
     });
   }
   data.banned.forEach((b,i)=>{
     const tr = document.createElement('tr'); tr.className='border-t border-white/5';
-    tr.innerHTML = `<td class="p-3 text-[var(--muted)]">${i+1}</td><td class="p-3 font-semibold text-[var(--rose)]">${b.Name||'—'}</td><td class="p-3 text-[var(--muted)] text-xs">${b.Timestamp?new Date(b.Timestamp).toLocaleString('ar-EG'):'—'}</td>`;
+    tr.innerHTML = `<td class="p-3 text-[var(--muted)]">${i+1}</td><td class="p-3 font-semibold text-[var(--rose)]">${b.Name||'—'}</td><td class="p-3 text-[var(--muted)] text-xs">${b.Timestamp?new Date(b.Timestamp).toLocaleString('ar-EG'):'—'}</td>
+      <td class="p-3 text-xs"><button class="admin-unban-btn text-[var(--emerald)] underline">فك الحظر</button></td>`;
+    tr.querySelector('.admin-unban-btn').addEventListener('click', ()=> adminUnbanFingerprint(b.Fingerprint));
     bannedBody.appendChild(tr);
   });
 }
